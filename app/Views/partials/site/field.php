@@ -33,7 +33,7 @@ $type     = (string) ($type ?? 'text');
 $value    = (string) ($value ?? '');
 $error    = (string) ($error ?? '');
 $hint     = (string) ($hint ?? '');
-$id       = (string) ($id ?? ('f-' . preg_replace('/[^a-z0-9_-]+/i', '-', $name)));
+$id       = (string) ($id ?? ('f-' . trim((string) preg_replace('/[^a-z0-9_-]+/i', '-', $name), '-')));
 $required = (bool) ($required ?? false);
 $optional = (bool) ($optional ?? false);
 $maxlength = (int) ($maxlength ?? 0);
@@ -74,7 +74,9 @@ $all = $common + $attrs;
 $render = static function (array $list): string {
     $html = '';
     foreach ($list as $k => $v) {
-        if ($v === false || $v === null || !preg_match('/^[a-z][a-z0-9-]*$/i', (string) $k)) {
+        // Nom d'attribut simple uniquement ; jamais de gestionnaire on* ni de style (CSP).
+        if ($v === false || $v === null || !preg_match('/^[a-z][a-z0-9-]*$/i', (string) $k)
+            || preg_match('/^(on|style$)/i', (string) $k)) {
             continue;
         }
         $html .= $v === true ? ' ' . $k : ' ' . $k . '="' . e((string) $v) . '"';

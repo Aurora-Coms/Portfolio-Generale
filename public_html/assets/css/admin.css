@@ -864,6 +864,7 @@ main:focus {
    9. Tableaux de données (défilement horizontal sur mobile)
    -------------------------------------------------------------------------- */
 .table-wrap {
+    position: relative; /* contient les textes .sr-only des cellules (pas de débordement de page) */
     width: 100%;
     overflow-x: auto;
     background: var(--c-panel);
@@ -1568,7 +1569,7 @@ a.table__title:hover {
    -------------------------------------------------------------------------- */
 .thumb-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
     gap: 14px;
     margin: 0;
     padding: 0;
@@ -1611,6 +1612,8 @@ a.table__title:hover {
 }
 
 .thumb__body {
+    flex: 1 0 auto;
+    align-content: start;
     display: grid;
     gap: 10px;
     padding: 12px;

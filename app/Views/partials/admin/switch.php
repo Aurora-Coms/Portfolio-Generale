@@ -17,7 +17,7 @@ declare(strict_types=1);
 $name    = (string) ($name ?? '');
 $label   = (string) ($label ?? '');
 $checked = (bool) ($checked ?? false);
-$id      = (string) ($id ?? ('f-' . preg_replace('/[^a-z0-9_-]+/i', '-', $name)));
+$id      = (string) ($id ?? ('f-' . trim((string) preg_replace('/[^a-z0-9_-]+/i', '-', $name), '-')));
 $hint    = (string) ($hint ?? '');
 $value   = (string) ($value ?? '1');
 ?>

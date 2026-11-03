@@ -157,7 +157,7 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
+        }, { rootMargin: '0px', threshold: 0.01 });
 
         var limit = window.innerHeight || document.documentElement.clientHeight;
         each('[data-reveal]', function (el) {

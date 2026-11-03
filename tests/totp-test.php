@@ -147,13 +147,14 @@ check('QR données trop longues : exception', $thrown);
 $uri = Totp::provisioningUri(Totp::generateSecret(), 'admin', 'Portfolio Alexandre Derbez');
 $cases = [
     'courte' => 'A',
-    'vide' => '',
     'url' => 'https://alexandre-derbez.fr/projets',
     'URI otpauth réaliste' => $uri,
     '~150 octets' => substr(str_repeat('Stage BTS CIEL IR du 18 mai au 26 juin 2026 · ', 4), 0, 150),
     'accents UTF-8' => 'Électronique, réseaux & sécurité : déjà vu ? Ça marche ! « guillemets » 2FA ✓ 🚲',
     'binaire' => "\x00\x01\x02\xFF\xFE" . 'fin',
 ] + $cases;
+// Chaîne vide : version 1 valide (les décodeurs ignorent un contenu vide, d'où l'absence de décodage).
+check('QR chaîne vide : version 1', count(QrCode::matrix('')) === 21);
 check('QR URI otpauth tient en version ≤ 10', count(QrCode::matrix($uri)) <= 57);
 
 // --- SVG -----------------------------------------------------------------------
@@ -243,7 +244,7 @@ if (!is_array($report) || !isset($report['results'])) {
         }
         // OpenCV : second décodeur indépendant, exigé sur les cas « réalistes »
         // (texte UTF-8 valide, versions ≤ 10) ; simple statistique au-delà.
-        $realistic = !str_starts_with($label, 'capacité') && mb_check_encoding($cases[$label], 'UTF-8') && $cases[$label] !== '';
+        $realistic = !str_starts_with($label, 'capacité') && mb_check_encoding($cases[$label], 'UTF-8');
         if ($realistic) {
             check("décodage OpenCV : {$label}", ($res['opencv'] ?? null) === $expected);
         } else {

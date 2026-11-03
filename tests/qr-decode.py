@@ -44,7 +44,12 @@ def main(paths):
         decoders.append("zxing-cpp")
     decoders.append("opencv")
 
-    detector = cv2.QRCodeDetector()
+    # Deux détecteurs OpenCV : le classique échoue parfois sur la localisation
+    # (environ 1 image sur 10, y compris avec des QR de référence) ; la variante
+    # Aruco sert alors de repli. Le décodage reste celui d'OpenCV.
+    detectors = [cv2.QRCodeDetector()]
+    if hasattr(cv2, "QRCodeDetectorAruco"):
+        detectors.append(cv2.QRCodeDetectorAruco())
     results = []
     for path in paths:
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
@@ -59,8 +64,12 @@ def main(paths):
             entry["zxing-cpp"] = found[0].bytes.hex() if found else None
             entry["zxing-ec"] = found[0].ec_level if found else None
 
-        text, _points, _straight = detector.detectAndDecode(image)
-        entry["opencv"] = text.encode("utf-8").hex() if text else None
+        entry["opencv"] = None
+        for detector in detectors:
+            text, _points, _straight = detector.detectAndDecode(image)
+            if text:
+                entry["opencv"] = text.encode("utf-8").hex()
+                break
         results.append(entry)
 
     print(json.dumps({"decoders": decoders, "results": results}))

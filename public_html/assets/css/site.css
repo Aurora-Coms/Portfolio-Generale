@@ -619,6 +619,11 @@ main:focus {
     }
 }
 
+.section-head > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .section-head {
     display: flex;
     flex-wrap: wrap;
@@ -922,6 +927,7 @@ main:focus {
     white-space: pre;
     color: var(--c-text);
     tab-size: 4;
+    font-variant-ligatures: none; /* « == » reste lisible */
 }
 
 .code-window__code code {
@@ -973,6 +979,9 @@ main:focus {
    9. Puces de filtre (catégories de projets)
    -------------------------------------------------------------------------- */
 .filters {
+    position: relative;
+    min-width: 0;
+    max-width: 100%;
     margin-bottom: 24px;
 }
 
@@ -1827,9 +1836,12 @@ body.has-dialog {
     margin-top: .5em;
 }
 
-.prose ul,
-.prose ol {
+.prose ul {
     padding-left: 1.4em;
+}
+
+.prose ol {
+    padding-left: 1.9em;
 }
 
 .prose li + li {
@@ -1913,7 +1925,7 @@ body.has-dialog {
 /* Formes distinctes en plus de la couleur : rond, carré, losange. */
 .timeline__dot {
     position: absolute;
-    left: -8px;
+    left: -10px;
     top: 7px;
     width: 14px;
     height: 14px;
@@ -2161,11 +2173,16 @@ body.has-dialog {
     font-size: 15px;
 }
 
+/* Ordinateur : clés alignées en colonne (les lignes deviennent transparentes). */
 @media (min-width: 640px) {
-    .facts__row {
-        grid-template-columns: 11ch minmax(0, 1fr);
-        gap: 12px;
+    .facts__list {
+        grid-template-columns: max-content minmax(0, 1fr);
+        gap: 10px 16px;
         align-items: baseline;
+    }
+
+    .facts__row {
+        display: contents;
     }
 }
 
