@@ -24,8 +24,10 @@ $groups = [
         ['Catégories', '/admin/categories', 'folder', is_current('/admin/categories')],
         ['Tags', '/admin/tags', 'tag', is_current('/admin/tags')],
         ['Parcours', '/admin/parcours', 'calendar', is_current('/admin/parcours')],
-        ['Compétences', '/admin/competences', 'chip', is_current('/admin/competences') && !is_current('/admin/competences/categories')],
-        ['Catégories de compétences', '/admin/competences/categories', 'code', is_current('/admin/competences/categories')],
+        ['Compétences', '/admin/competences', 'chip', is_current('/admin/competences')
+            && !is_current('/admin/competences/themes') && !is_current('/admin/competences/categories')],
+        ['Thèmes de compétences', '/admin/competences/themes', 'book', is_current('/admin/competences/themes')],
+        ['Sous-catégories de compétences', '/admin/competences/categories', 'code', is_current('/admin/competences/categories')],
         ['Centres d\'intérêt', '/admin/interets', 'star', is_current('/admin/interets')],
         ['À propos', '/admin/a-propos', 'user', is_current('/admin/a-propos')],
     ],

@@ -2495,3 +2495,55 @@ a.table__link:hover {
         border-color: #000;
     }
 }
+
+/* === Ajouts thèmes de compétences === */
+/* Compétences rangées par thème puis par sous-catégorie (admin/skills/index,
+   admin/skill-categories/index, admin/skill-themes/*).
+   Documentés dans docs/STYLEGUIDE.md, section « Ajouts thèmes de compétences ». */
+
+/* Bloc d'un thème : titre h2 puis ses sous-catégories (.skill-group, titre h3).
+   Un filet sépare deux thèmes. */
+.skill-theme-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* le tableau (640 px min.) défile dans .table-wrap */
+    gap: 20px;
+    scroll-margin-top: 16px;
+}
+
+.skill-theme-group + .skill-theme-group {
+    padding-top: 32px;
+    border-top: 1px solid var(--c-border);
+}
+
+.skill-theme-group__title {
+    font-size: 19px;
+}
+
+/* Sous-catégories d'un thème : légère indentation sur grand écran. */
+@media (min-width: 900px) {
+    .skill-theme-group > .skill-group,
+    .skill-theme-group > .empty-inline {
+        margin-left: 46px;
+    }
+}
+
+/* Pastille d'icône plus petite (titre h3 d'une sous-catégorie). */
+.icon-box--sm {
+    width: 28px;
+    height: 28px;
+}
+
+/* Barre latérale : les libellés longs (« Sous-catégories de compétences »)
+   passent sur deux lignes ; interligne resserré et marge verticale pour qu'ils
+   ne se collent pas. Les liens d'une ligne gardent leur hauteur (44 px). */
+.admin-nav__link {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    line-height: 1.35;
+}
+
+/* Compétence sans niveau (savoir-être, atouts) dans la colonne « Niveau ». */
+.level-cell__label--none {
+    color: var(--c-text-muted);
+}
+/* === Fin des ajouts thèmes de compétences === */

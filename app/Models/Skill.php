@@ -1,6 +1,8 @@
 <?php
 /**
  * Compétences, niveau de 1 (notions) à 5 (maîtrise).
+ * level NULL : compétence sans barre de niveau (savoir-être, atouts).
+ * level_label : libellé affiché à la place du libellé standard (« A2 »…).
  */
 
 declare(strict_types=1);
@@ -12,19 +14,23 @@ use App\Core\Database;
 final class Skill
 {
     /** Colonnes modifiables (liste blanche). */
-    private const COLUMNS = ['category_id', 'name', 'level', 'description', 'position'];
+    private const COLUMNS = ['category_id', 'name', 'level', 'level_label', 'description', 'position'];
 
     /**
-     * Toutes les compétences + category_name, triées par catégorie puis position.
+     * Toutes les compétences + category_name et theme_name, triées par thème,
+     * puis sous-catégorie, puis position.
      *
      * @return list<array<string, mixed>>
      */
     public static function all(): array
     {
         return Database::fetchAll(
-            'SELECT s.*, c.name AS category_name
-             FROM skills s JOIN skill_categories c ON c.id = s.category_id
-             ORDER BY c.position ASC, c.name ASC, s.position ASC, s.name ASC, s.id ASC'
+            'SELECT s.*, c.name AS category_name, t.name AS theme_name
+             FROM skills s
+             JOIN skill_categories c ON c.id = s.category_id
+             JOIN skill_themes t ON t.id = c.theme_id
+             ORDER BY t.position ASC, t.name ASC, t.id ASC, c.position ASC, c.name ASC, c.id ASC,
+                      s.position ASC, s.name ASC, s.id ASC'
         );
     }
 

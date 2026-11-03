@@ -44,7 +44,7 @@ Autres documents :
 | Projets techniques | `/projets/techniques` | réseau, cybersécurité, systèmes, TP et CTF |
 | Détail d'un projet | `/projet/{adresse}` | description, galerie d'images, vidéo YouTube (chargée après un clic) |
 | Parcours | `/parcours` | études et stages, sous forme de frise |
-| Compétences | `/competences` | compétences par catégorie, avec niveau |
+| Compétences | `/competences` | compétences par thème et sous-catégorie, avec ou sans niveau |
 | À propos | `/a-propos` | présentation détaillée et centres d'intérêt |
 | Contact | `/contact` | formulaire protégé contre le spam |
 | CV | `/cv` | téléchargement du CV en PDF (s'il a été envoyé) |
@@ -90,6 +90,7 @@ portfolio-generale/
 │   ├── assets/           css/, js/, fonts/, img/
 │   └── uploads/projects/ images des projets (exécution de code interdite)
 ├── database.sql          structure de la base + contenus de départ
+├── database/migrations/  mises à jour d'une base déjà en ligne (docs/MIGRATIONS.md)
 ├── docs/                 documentation (non envoyée sur le serveur)
 └── tests/                tests automatiques (non envoyés sur le serveur)
 ```
@@ -259,7 +260,7 @@ domains/votre-domaine.fr/
 > contient le code et `config.php`, qui ne doivent pas être accessibles depuis le
 > web. `public_html/index.php` va chercher `../app/bootstrap.php`.
 
-À **ne pas** envoyer : `database.sql`, `docs/`, `tests/`, `.git/`, `.github/`,
+À **ne pas** envoyer : `database.sql`, `database/`, `docs/`, `tests/`, `.git/`, `.github/`,
 `README.md`, `.gitignore`.
 
 **Méthode A · Gestionnaire de fichiers de hPanel** (le plus simple)
@@ -420,7 +421,7 @@ Quand vous partagez la page d'un projet, c'est **l'image de couverture du projet
 | **Catégories** | catégories de projets, propres à chaque section (jeux ou technique) : elles servent de filtres |
 | **Tags** | technologies affichées sur les projets (Lua, Roblox Studio…) |
 | **Parcours** | études, stages et autres expériences (frise du site) |
-| **Compétences** / **Catégories de compétences** | compétences avec un niveau de 1 (Notions) à 5 (Maîtrise) |
+| **Compétences** / **Thèmes de compétences** / **Sous-catégories de compétences** | compétences rangées en thèmes (Informatique & réseaux, Langues…) puis en sous-catégories (Réseau, Systèmes…), avec un niveau de 1 (Notions) à 5 (Maîtrise) ou sans niveau (savoir-être, atouts) ; libellé de niveau personnalisable (« A2 », « Langue maternelle ») |
 | **Centres d'intérêt** | VTT, jeux vidéo… avec une icône |
 | **À propos** | texte de présentation détaillé |
 | **Messages** | messages du formulaire de contact ; ceux de plus de 12 mois sont supprimés automatiquement (RGPD) |
@@ -510,7 +511,8 @@ Sauvegardes, selon l'offre).
 **Mettre à jour le site** : envoyez seulement les fichiers modifiés, **sans écraser**
 `app/config.php`, `app/storage/` ni `public_html/uploads/`, et **sans réimporter**
 `database.sql`. Si une évolution modifie la structure de la base, appliquez
-uniquement la requête SQL correspondante dans phpMyAdmin, après une sauvegarde.
+uniquement le fichier correspondant de `database/migrations/` dans phpMyAdmin,
+après une sauvegarde (mode d'emploi : `docs/MIGRATIONS.md`).
 
 **Journaux** : les erreurs sont enregistrées dans `app/storage/logs/php-errors.log`
 (jamais affichées aux visiteurs). Consultez-le de temps en temps et videz-le s'il

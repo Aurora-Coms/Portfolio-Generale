@@ -35,7 +35,8 @@ public_html/
   assets/css|js|fonts|img
   uploads/projects/    images générées (exécution interdite)
   setup-admin.php      création du 1er admin (à supprimer après usage)
-database.sql           schéma + données de départ
+database.sql           schéma + données de départ (nouvelle installation)
+database/migrations/   mises à jour d'une base déjà installée (voir docs/MIGRATIONS.md)
 tests/                 tests (non déployés)
 docs/                  documentation (non déployée)
 ```
@@ -149,13 +150,24 @@ Toutes les méthodes sont statiques. Les lignes sont des tableaux associatifs
 ### TimelineEntry
 - `published(): list` (par `start_date` DESC, puis `position`), `all()`, `find`, `create`, `update`, `delete`.
 
-### SkillCategory
-- `withSkills(): list` : catégories (par position) avec clé `skills` (liste par position).
-- `all()` (+ `skill_count`), `find`, `create`, `update`, `delete(int $id): bool` (false si elle contient des compétences),
-  `slugExists(string $slug, ?int $except)`.
+### SkillTheme (thèmes de compétences : niveau le plus haut)
+- `tree(bool $includeEmpty = false): list` : thèmes (par position) avec clé `categories` (par position),
+  chacune avec clé `skills` (par position). 3 requêtes. Sans `$includeEmpty`, les sous-catégories sans
+  compétence et les thèmes sans sous-catégorie affichable sont exclus (page publique).
+- `all()` (+ `category_count`), `find`, `create`, `update`, `delete(int $id): bool` (false s'il contient des
+  sous-catégories), `slugExists(string $slug, ?int $except)`.
+
+### SkillCategory (sous-catégories de compétences, rangées dans un thème)
+- Colonnes : `theme_id` (obligatoire, clé étrangère ON DELETE RESTRICT), `name`, `slug`, `icon`, `position`.
+- `withSkills(): list` : catégories (par position) avec clé `skills` (liste par position). Conservée pour
+  compatibilité ; préférer `SkillTheme::tree()`.
+- `all()` (+ `theme_name`, `skill_count` ; triées par thème puis position), `find`, `create`, `update`,
+  `delete(int $id): bool` (false si elle contient des compétences), `slugExists(string $slug, ?int $except)`.
 
 ### Skill
-- `all(): list` (+ `category_name`), `find`, `create`, `update`, `delete`.
+- Colonnes : `category_id`, `name`, `level` (1 à 5 ou `null` = sans barre de niveau), `level_label`
+  (≤ 40, libellé affiché à la place de `level_label()`, ex. « A2 »), `description`, `position`.
+- `all(): list` (+ `category_name`, `theme_name`), `find`, `create`, `update`, `delete`.
 
 ### Interest
 - `all()`, `find`, `create`, `update`, `delete`.

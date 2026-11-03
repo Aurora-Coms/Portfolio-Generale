@@ -70,6 +70,7 @@ $router->resource('/admin/tags', Admin\TagController::class);
 
 // Parcours, compétences, centres d'intérêt
 $router->resource('/admin/parcours', Admin\TimelineController::class);
+$router->resource('/admin/competences/themes', Admin\SkillThemeController::class);
 $router->resource('/admin/competences/categories', Admin\SkillCategoryController::class);
 $router->resource('/admin/competences', Admin\SkillController::class);
 $router->resource('/admin/interets', Admin\InterestController::class);

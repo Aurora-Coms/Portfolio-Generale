@@ -531,17 +531,23 @@ Chaque type a une couleur, une forme (rond, carré, losange) **et** une
 
 ### Compétences : `partial('site/skill-category')` et `partial('site/skill-meter')`
 
-`site/skill-category` : `category` (ligne de `SkillCategory::withSkills()` :
-`name`, `icon`, `skills[]` avec `name`, `level`, `description`),
-`headingLevel` (3), `reveal` (true).
+`site/skill-category` : `category` (sous-catégorie de `SkillTheme::tree()`
+ou de `SkillCategory::withSkills()` : `name`, `icon`, `skills[]` avec `name`,
+`level` (1 à 5 ou `null`), `level_label`, `description`), `headingLevel` (3),
+`showTitle` (true ; false = carte sans en-tête), `wide` (false ; true =
+compétences en colonnes), `reveal` (true). Une compétence sans niveau
+(`level` `null`) n'a pas de barre : coche + nom + description. Voir
+[Ajouts thèmes de compétences](#ajouts-thèmes-de-compétences).
 
-`site/skill-meter` : `level` (1 à 5). Produit 5 segments (`.meter.level-N`,
-décoratifs) et le texte accessible « Niveau 4 sur 5 : Avancé » (`level_label()`).
+`site/skill-meter` : `level` (1 à 5), `label` (facultatif : libellé
+personnalisé, ex. « A2 »). Produit 5 segments (`.meter.level-N`,
+décoratifs) et le texte accessible « Niveau 4 sur 5 : Avancé » (`label`,
+sinon `level_label()`).
 
 ```php
-<div class="grid grid--3">
-<?php foreach ($categories as $category): ?>
-    <?= partial('site/skill-category', ['category' => $category, 'headingLevel' => 2]) ?>
+<div class="skill-theme__grid">
+<?php foreach ($theme['categories'] as $category): ?>
+    <?= partial('site/skill-category', ['category' => $category, 'headingLevel' => 3]) ?>
 <?php endforeach; ?>
 </div>
 ```
@@ -1005,11 +1011,12 @@ gros code, titre, fenêtre de code, boutons (accueil, projets, contact). Sous
 SVG en ligne décoratif (`aria-hidden`). Noms disponibles : `download`,
 `arrow`, `arrow-left`, `info`, `menu`, `close`, `file`, `external`, `play`,
 `mail`, `linkedin`, `github`, `network`, `server`, `code`, `shield`, `tools`,
-`chip`, `terminal`, `bike`, `gamepad`, `book`, `music`, `calendar`, `check`,
+`chip`, `terminal`, `globe`, `bike`, `gamepad`, `book`, `music`, `calendar`, `check`,
 `lock`, `trash`, `edit`, `eye`, `star`, `up`, `down`, `logout`, `image`,
 `folder`, `tag`, `settings`, `user`, `home`. Un nom inconnu renvoie `''`.
-Ces noms sont aussi les valeurs possibles des colonnes `icon` (catégories de
-compétences, centres d'intérêt) : proposez-les dans un `<select>`.
+Ces noms sont aussi les valeurs possibles des colonnes `icon` (thèmes et
+sous-catégories de compétences, centres d'intérêt) : proposez-les dans un
+`<select>` ou avec `partial('admin/icon-picker')`.
 
 ### Fichiers fixes (`public_html/assets/img/`)
 
@@ -1318,7 +1325,8 @@ JavaScript, utilisable au clavier (flèches), focus visible sur la tuile.
 
 Classes : `.icon-picker`, `__list`, `__item`, `__input` (radio réel, invisible
 mais focalisable), `__label`, `__preview`, `__name`, `__code`. Listes blanches
-d'icônes : `SkillCategoryController::ICONS`, `InterestController::ICONS`.
+d'icônes : `SkillThemeController::ICONS` (reprise par
+`SkillCategoryController::ICONS`), `InterestController::ICONS`.
 
 #### Classes ajoutées
 
@@ -1398,3 +1406,77 @@ Points à connaître :
 | `data-copy-target="#id"` (sur un `<button hidden>`) + `data-copy-done="Codes copiés"` | bouton affiché seulement si le presse-papiers est disponible ; copie les `<li>` de la cible, un par ligne, et l'annonce dans `[data-copy-status]` (région `aria-live`) |
 | `data-print` (sur un `<button hidden>`) | bouton « Imprimer » affiché avec JS seulement |
 | plusieurs `form[data-focus-error]` sur une page | si rien n'a le focus au chargement, il va au premier champ `aria-invalid="true"` de la page, quel que soit le formulaire (le comportement de base ne regarde que le premier formulaire) |
+
+---
+
+## Ajouts thèmes de compétences
+
+Compétences organisées en **thèmes > sous-catégories > compétences**. Styles :
+fin de `site.css` et de `admin.css`, section
+`/* === Ajouts thèmes de compétences === */`. Aucun JavaScript.
+
+### Données
+
+`SkillTheme::tree()` renvoie les thèmes (par position) avec `categories`
+(par position) et, dans chacune, `skills` (par position) ; thèmes et
+sous-catégories vides exclus (`tree(true)` : tout, pour l'administration).
+Une compétence a un `level` de 1 à 5 **ou `null`** (pas de barre) et un
+`level_label` facultatif (« A2 », « Langue maternelle ») qui remplace le
+libellé standard partout (texte visible et texte lu).
+
+### Page publique `/competences` (`site/skills`)
+
+| Classe | Rôle |
+|---|---|
+| `.theme-nav`, `__list`, `__link` | liens d'ancre vers chaque thème : puces `.chip` (icône + nom + `.chip__count`) qui passent à la ligne ; masqués à l'impression |
+| `.skill-theme` | section d'un thème, `id="theme-{slug}"` (cible des ancres ; marge haute de défilement fournie par `html { scroll-padding-top }`) |
+| `.skill-theme__head`, `__comment`, `__title`, `__icon` | commentaire `-- {slug}/` décoratif, titre `h2` mono avec pastille d'icône **pleine** (celle des cartes est en fond doux) |
+| `.skill-theme__grid` | cartes des sous-catégories : 1 colonne, 2 dès 640 px, 3 dès 1024 px |
+| `.skill-theme__grid--pairs` | 2 ou 4 cartes : reste sur 2 colonnes (pas de carte isolée) |
+| `.skill-card--wide` + `.skill-list--cols` | thème à **une seule** sous-catégorie du **même nom** (Langues, Savoir-être…) : une carte pleine largeur sans titre répété, compétences en colonnes (auto dès 640 px, 3 dès 1024 px ; une compétence seule prend toute la largeur) |
+| `.skill__level--custom` | libellé personnalisé du niveau en pastille accent bien visible |
+| `.skill--plain`, `.skill__mark` | compétence sans niveau : coche verte décorative + nom, description en retrait |
+
+La légende `.level-legend` n'est affichée qu'une fois, en haut, et seulement
+si au moins une compétence a un niveau.
+
+```php
+<section class="skill-theme" id="theme-<?= e($theme['slug']) ?>" aria-labelledby="titre-theme-<?= e($theme['slug']) ?>">
+    <div class="skill-theme__head">
+        <p class="skill-theme__comment" aria-hidden="true">-- <?= e($theme['slug']) ?>/</p>
+        <h2 class="skill-theme__title" id="titre-theme-<?= e($theme['slug']) ?>"><span class="skill-theme__icon"><?= icon($theme['icon'], 22) ?></span><?= e($theme['name']) ?></h2>
+    </div>
+    <?= partial('site/skill-category', ['category' => $theme['categories'][0], 'showTitle' => false, 'wide' => true]) ?>
+</section>
+```
+
+### Administration
+
+| Route | Contrôleur | Vues (`app/Views/admin/…`) |
+|---|---|---|
+| `/admin/competences/themes` (resource) | `SkillThemeController` | `skill-themes/index`, `skill-themes/form` |
+| `/admin/competences/categories` (resource, `?theme=ID` présélectionne le thème) | `SkillCategoryController` | `skill-categories/index` (groupée par thème), `skill-categories/form` (select « Thème » obligatoire) |
+| `/admin/competences` (resource, `?categorie=ID`) | `SkillController` | `skills/index` (groupée par thème puis sous-catégorie), `skills/form` (niveau facultatif, « Libellé du niveau » ≤ 40) |
+
+- Thème : nom, ordre, icône (`admin/icon-picker`, liste blanche
+  `SkillThemeController::ICONS`) ; slug unique créé depuis le nom (ancre
+  publique `#theme-{slug}`). Suppression refusée (message flash) tant que le
+  thème contient des sous-catégories.
+- Barre latérale : « Compétences », « Thèmes de compétences »,
+  « Sous-catégories de compétences ».
+
+| Classe (`admin.css`) | Rôle |
+|---|---|
+| `.skill-theme-group`, `__title` | bloc d'un thème (h2) contenant ses `.skill-group` (h3 `.subsection-title`) ; filet entre deux thèmes ; sous-catégories en retrait dès 900 px |
+| `.icon-box--sm` | pastille d'icône 28 px (titre h3) |
+| `.level-cell__label--none` | « Sans niveau » dans la colonne Niveau |
+
+Attention : `.skill-group .table` fixe la largeur des colonnes 2 à 4 dès
+900 px (tableau Compétence / Niveau / Ordre / Actions). N'utilisez pas
+`.skill-group` autour d'un tableau aux colonnes différentes (la liste des
+sous-catégories utilise `.stack`).
+
+Correctif général : `.admin-nav__link` a une marge verticale de 6 px et un
+interligne de 1.35 ; un libellé sur deux lignes (« Sous-catégories de
+compétences ») ne se colle plus aux voisins, les liens d'une ligne gardent
+leurs 44 px.

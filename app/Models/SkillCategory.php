@@ -1,6 +1,8 @@
 <?php
 /**
- * Catégories de compétences (Réseau, Systèmes, Scripting / Lua…).
+ * Sous-catégories de compétences (Réseau, Systèmes, Scripting / Lua…),
+ * rangées chacune dans un thème (SkillTheme). Le nom de la table reste
+ * « skill_categories » pour ne pas casser les liens existants.
  */
 
 declare(strict_types=1);
@@ -13,12 +15,16 @@ use PDOException;
 final class SkillCategory
 {
     /** Colonnes modifiables (liste blanche). */
-    private const COLUMNS = ['name', 'slug', 'icon', 'position'];
+    private const COLUMNS = ['theme_id', 'name', 'slug', 'icon', 'position'];
 
     /**
      * Toutes les catégories (par position), chacune avec sa clé « skills »
      * (compétences par position ; liste vide si la catégorie n'en a pas).
      * Deux requêtes au total.
+     *
+     * Conservée pour compatibilité : la page « Compétences » et
+     * l'administration utilisent désormais SkillTheme::tree() (regroupement
+     * par thème).
      *
      * @return list<array<string, mixed>>
      */
@@ -37,16 +43,19 @@ final class SkillCategory
     }
 
     /**
-     * Toutes les catégories (par position) + skill_count.
+     * Toutes les sous-catégories + theme_name et skill_count, triées par
+     * thème (position du thème) puis par position dans le thème.
      *
      * @return list<array<string, mixed>>
      */
     public static function all(): array
     {
         $rows = Database::fetchAll(
-            'SELECT c.*, (SELECT COUNT(*) FROM skills s WHERE s.category_id = c.id) AS skill_count
+            'SELECT c.*, t.name AS theme_name,
+                    (SELECT COUNT(*) FROM skills s WHERE s.category_id = c.id) AS skill_count
              FROM skill_categories c
-             ORDER BY c.position ASC, c.name ASC, c.id ASC'
+             JOIN skill_themes t ON t.id = c.theme_id
+             ORDER BY t.position ASC, t.name ASC, t.id ASC, c.position ASC, c.name ASC, c.id ASC'
         );
         foreach ($rows as &$row) {
             $row['skill_count'] = (int) $row['skill_count'];

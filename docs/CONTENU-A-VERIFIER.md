@@ -129,35 +129,36 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 
 ## 6. Compétences (Administration > Compétences)
 
-**Tous les niveaux sont [supposés]**, estimés pour un étudiant de 1re année
-de BTS CIEL IR qui a fait 6 stages de maintenance et beaucoup de Lua.
-Échelle : 1 Notions · 2 Bases · 3 Intermédiaire · 4 Avancé · 5 Maîtrise.
-Toutes les descriptions ont aussi été rédigées par Claude.
+Organisation : **thèmes > sous-catégories > compétences** (Administration >
+Thèmes de compétences, Sous-catégories de compétences, Compétences).
 
-| Catégorie | Compétence | Niveau | Remarque |
-|---|---|---|---|
-| Réseau | Adressage IPv4 et sous-réseaux | 3 | |
-| Réseau | Câblage et brassage | 3 | Suppose des câbles RJ45 réalisés en Bac Pro |
-| Réseau | Commutation et VLAN | 2 | |
-| Réseau | Routage | 2 | « premières notions de routage dynamique » |
-| Réseau | Services réseau (DHCP, DNS) | 2 | |
-| Systèmes | Maintenance matériel | 4 | |
-| Systèmes | Windows (poste de travail) | 4 | |
-| Systèmes | Windows Server | 2 | Suppose des notions d'Active Directory |
-| Systèmes | Linux | 2 | |
-| Systèmes | Virtualisation | 2 | |
-| Scripting / Lua | Lua / Luau | 4 | |
-| Scripting / Lua | Roblox Studio | 4 | |
-| Scripting / Lua | Architecture client / serveur | 3 | |
-| Scripting / Lua | Python | 2 | **Non mentionné par Alexandre** : supprimer si non pratiqué |
-| Cybersécurité | Hygiène informatique | 3 | |
-| Cybersécurité | Validation côté serveur | 3 | |
-| Cybersécurité | Menaces et attaques courantes | 2 | |
-| Cybersécurité | Sécurisation d'un poste | 2 | |
-| Outils | Cisco Packet Tracer | 3 | Suppose une utilisation en cours |
-| Outils | Wireshark | 2 | Suppose une utilisation en cours |
-| Outils | Outils de diagnostic matériel | 3 | |
-| Outils | Git | 2 | **Non mentionné par Alexandre** : supprimer si non pratiqué |
+- [x] **Niveaux CONFIRMÉS par Alexandre** (novembre 2026) : plus rien à
+  vérifier de ce côté. Échelle : 1 Notions · 2 Bases · 3 Intermédiaire ·
+  4 Avancé · 5 Maîtrise. Langues : libellé CECRL (A1, A2…) ou « Langue
+  maternelle » à la place du libellé standard.
+- [x] Savoir-être et autres atouts : sans niveau (pas de barre), comme demandé.
+  « Persévérance », permis B et secourisme non retenus.
+- [ ] **Seules les descriptions restent à relire** (une phrase par compétence,
+  rédigée par Claude sauf mention contraire). Les corriger ou les vider
+  depuis l'administration si elles ne correspondent pas à ce que tu fais
+  réellement.
+
+| Thème · sous-catégorie | Compétences dont la description est à relire | Remarque |
+|---|---|---|
+| Informatique & réseaux · Réseau | les 5 | descriptions d'origine conservées |
+| Informatique & réseaux · Systèmes | les 5 | « Windows Server » renommée « Windows Server / Active Directory » |
+| Informatique & réseaux · Cybersécurité | Menaces et attaques courantes, Sécurisation d'un poste | réécrites en « Premières notions : … » pour coller au niveau 1 |
+| Informatique & réseaux · Cybersécurité | Hygiène informatique, Validation côté serveur | descriptions d'origine conservées |
+| Informatique & réseaux · Outils | GitHub | **nouvelle** description, générique |
+| Informatique & réseaux · Outils | Cisco Packet Tracer, Wireshark, Outils de diagnostic matériel, Git | descriptions d'origine conservées |
+| Développement · Scripting / Lua | les 3 | descriptions d'origine conservées |
+| Développement · Scripting / Web | HTML, CSS, JavaScript, PHP, SQL et bases de données (MySQL) | **nouvelles** descriptions, génériques (aucun projet cité) |
+| Développement · Autres langages | C / C++, Bash / ligne de commande, Java | **nouvelles** descriptions, génériques |
+| Développement · Autres langages | Python | description d'origine conservée (déplacée depuis Scripting / Lua) |
+| Électronique | Mesures, Microcontrôleurs, Soudure | **nouvelles** descriptions, génériques |
+| Savoir-être | Travail en équipe, Relation avec les utilisateurs, Rigueur et organisation, Curiosité et autoformation | tes exemples, reformulés à la 1re personne sans en changer le sens ; « Autonomie » sans exemple (à compléter si tu veux) |
+| Autres atouts | Formation BIA | « Formation suivie, sans passage du diplôme. » (ton texte) |
+| Langues | Français, Anglais, Espagnol | pas de description |
 
 ---
 

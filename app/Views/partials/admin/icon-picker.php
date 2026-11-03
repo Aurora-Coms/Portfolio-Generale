@@ -2,7 +2,7 @@
 /**
  * Choix d'une icône parmi une liste fixe : boutons radio dont chaque libellé
  * montre l'aperçu réel de l'icône (helper icon()). Aucun JavaScript nécessaire.
- * Utilisé par les catégories de compétences et les centres d'intérêt.
+ * Utilisé par les thèmes et sous-catégories de compétences et les centres d'intérêt.
  *
  * Variables :
  *   $name     string  nom du champ (obligatoire), ex. 'icon'

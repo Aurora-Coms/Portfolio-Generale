@@ -1,9 +1,12 @@
 <?php
 /**
- * Administration des compétences (niveau de 1 à 5, rangées par catégorie).
+ * Administration des compétences, rangées par thème puis par sous-catégorie.
+ * Le niveau (1 à 5) est facultatif : sans niveau, la compétence est affichée
+ * sans barre (savoir-être, atouts). Un libellé personnalisé peut remplacer le
+ * libellé standard du niveau (ex. « A2 » ou « Langue maternelle »).
  *
- * Routes (Router::resource('/admin/competences')) : index, create, store,
- * edit, update, destroy.
+ * Routes (Router::resource('/admin/competences')) : index, create
+ * (?categorie=ID présélectionne la sous-catégorie), store, edit, update, destroy.
  */
 
 declare(strict_types=1);
@@ -15,20 +18,24 @@ use App\Core\Request;
 use App\Core\Validator;
 use App\Models\Skill;
 use App\Models\SkillCategory;
+use App\Models\SkillTheme;
 
 final class SkillController extends AdminController
 {
+    /** Longueur maximale du libellé du niveau (colonne VARCHAR(40)). */
+    private const LEVEL_LABEL_MAX = 40;
+
     public function index(): void
     {
         $this->render('admin/skills/index', [
-            'categories' => SkillCategory::withSkills(),
-            'meta'       => ['title' => 'Compétences'],
+            'themes' => SkillTheme::tree(true),
+            'meta'   => ['title' => 'Compétences'],
         ]);
     }
 
     public function create(): void
     {
-        // Catégorie présélectionnée depuis la liste (?categorie=ID), si elle existe.
+        // Sous-catégorie présélectionnée depuis la liste (?categorie=ID), si elle existe.
         $raw    = Request::query('categorie');
         $preset = preg_match('/^[1-9]\d{0,9}$/', $raw) === 1 ? (int) $raw : 0;
         $this->form(null, [
@@ -55,7 +62,9 @@ final class SkillController extends AdminController
         $this->form($skill, [
             'category_id' => (string) (int) $skill['category_id'],
             'name'        => (string) $skill['name'],
-            'level'       => (string) (int) $skill['level'],
+            // Niveau vide = « Sans niveau (pas de barre) ».
+            'level'       => $skill['level'] === null ? '' : (string) (int) $skill['level'],
+            'level_label' => (string) ($skill['level_label'] ?? ''),
             'description' => (string) ($skill['description'] ?? ''),
             'position'    => (string) (int) $skill['position'],
         ]);
@@ -118,12 +127,17 @@ final class SkillController extends AdminController
     {
         $v = new Validator($input);
 
-        // La catégorie doit exister (liste blanche des identifiants en base).
+        // La sous-catégorie doit exister (liste blanche des identifiants en base).
         $categoryIds = array_map(static fn (array $c): string => (string) (int) $c['id'], SkillCategory::all());
-        $category    = $v->in('category_id', 'Catégorie', $categoryIds);
+        $category    = $v->in('category_id', 'Sous-catégorie', $categoryIds);
+        if ($category === null && trim(is_string($input['category_id'] ?? null) ? $input['category_id'] : '') === '') {
+            $v->addError('category_id', 'Choisissez une sous-catégorie.');
+        }
 
         $name        = $v->string('name', 'Nom', required: true, max: 80);
-        $level       = $v->int('level', 'Niveau', required: true, min: 1, max: 5);
+        // Niveau facultatif : vide = pas de barre de niveau (NULL en base).
+        $level       = $v->int('level', 'Niveau', required: false, min: 1, max: 5);
+        $levelLabel  = $v->string('level_label', 'Libellé du niveau', max: self::LEVEL_LABEL_MAX);
         $description = $v->string('description', 'Description', max: 255);
         $position    = $v->int('position', 'Ordre', required: false, min: 0, max: 9999);
 
@@ -131,6 +145,7 @@ final class SkillController extends AdminController
             'category_id' => $category !== null ? (int) $category : null,
             'name'        => $name,
             'level'       => $level,
+            'level_label' => $levelLabel,
             'description' => $description,
             'position'    => $position ?? 0,
         ], $v->errors()];

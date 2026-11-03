@@ -2851,3 +2851,164 @@ body.has-dialog {
     }
 }
 /* === Fin des ajouts pages publiques === */
+
+/* === Ajouts thèmes de compétences === */
+/* Page « Compétences » : thèmes > sous-catégories (cartes) > compétences.
+   Documentés dans docs/STYLEGUIDE.md, section « Ajouts thèmes de compétences ». */
+
+/* Liens d'ancre vers les thèmes : puces .chip qui passent à la ligne
+   (tous les thèmes restent visibles, même sur téléphone). */
+.theme-nav__list {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.theme-nav__link .icon {
+    flex: none;
+    color: var(--c-accent);
+}
+
+/* Un thème : commentaire + titre h2 avec icône, puis ses cartes. */
+.stack-lg > .skill-theme {
+    margin-top: 48px;
+}
+
+.skill-theme__head {
+    margin-bottom: 18px;
+}
+
+.skill-theme__comment {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--c-comment);
+}
+
+.skill-theme__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 22px;
+    color: var(--c-text-strong);
+}
+
+/* Icône du thème : pastille pleine (celle des cartes est en fond doux). */
+.skill-theme__icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+}
+
+/* Cartes des sous-catégories : 1 colonne, 2 dès 640 px, 3 dès 1024 px ;
+   --pairs (2 ou 4 cartes) reste sur 2 colonnes pour éviter une carte isolée. */
+.skill-theme__grid {
+    display: grid;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .skill-theme__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 900px) {
+    .stack-lg > .skill-theme {
+        margin-top: 64px;
+    }
+
+    .skill-theme__head {
+        margin-bottom: 24px;
+    }
+
+    .skill-theme__title {
+        font-size: 26px;
+    }
+
+    .skill-theme__grid {
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .skill-theme__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .skill-theme__grid--pairs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Carte pleine largeur (thème à une seule sous-catégorie) : compétences en
+   colonnes dès 640 px, 3 colonnes dès 1024 px comme les grilles de cartes. */
+@media (min-width: 640px) {
+    .skill-list--cols {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+        gap: 20px 32px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .skill-list--cols {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px 40px;
+    }
+}
+
+/* Une seule compétence dans la carte : toute la largeur (pas de retour à la
+   ligne inutile dans une colonne étroite). */
+.skill-list--cols > .skill:only-child {
+    grid-column: 1 / -1;
+}
+
+/* Libellé personnalisé du niveau (« A2 », « Langue maternelle ») : pastille
+   accent bien visible à la place du libellé standard discret. */
+.skill__level--custom {
+    padding: 2px 9px;
+    border: 1px solid var(--c-accent);
+    border-radius: 999px;
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Compétence sans niveau (savoir-être, atouts) : coche + nom, puis l'exemple
+   en retrait sous le nom. */
+.skill--plain .skill__name {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.skill__mark {
+    display: inline-flex;
+    flex: none;
+    margin-top: 3px;
+    color: var(--c-string);
+}
+
+.skill--plain .skill__desc {
+    margin-top: 4px;
+    padding-left: 24px;
+}
+
+@media print {
+    .theme-nav {
+        display: none !important;
+    }
+}
+/* === Fin des ajouts thèmes de compétences === */

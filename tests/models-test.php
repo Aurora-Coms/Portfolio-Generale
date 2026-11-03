@@ -24,6 +24,7 @@ use App\Models\Project;
 use App\Models\ProjectImage;
 use App\Models\Skill;
 use App\Models\SkillCategory;
+use App\Models\SkillTheme;
 use App\Models\Tag;
 use App\Models\TimelineEntry;
 
@@ -51,7 +52,7 @@ function reset_tables(): void
     $pdo = Database::pdo();
     $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
     foreach (['project_tags', 'project_categories', 'project_images', 'projects', 'categories', 'tags',
-              'timeline_entries', 'skills', 'skill_categories', 'interests', 'messages'] as $table) {
+              'timeline_entries', 'skills', 'skill_categories', 'skill_themes', 'interests', 'messages'] as $table) {
         $pdo->exec('TRUNCATE TABLE ' . $table);
     }
     $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
@@ -350,13 +351,32 @@ check('TimelineEntry::delete', TimelineEntry::delete($e3) && TimelineEntry::find
 check('TimelineEntry::find inexistant', TimelineEntry::find(424242) === null);
 
 // =============================================================================
+//  SkillTheme
+// =============================================================================
+$thInfo  = SkillTheme::create(['name' => 'Informatique & réseaux', 'slug' => 'informatique-reseaux', 'icon' => 'network', 'position' => 2]);
+$thDev   = SkillTheme::create(['name' => 'Développement', 'slug' => 'developpement', 'icon' => 'code', 'position' => 1]);
+$thEmpty = SkillTheme::create(['name' => 'Langues', 'slug' => 'langues', 'icon' => 'globe', 'position' => 3, 'id' => 999]);
+check('SkillTheme::create / find', $thEmpty !== 999 && SkillTheme::find($thInfo)['name'] === 'Informatique & réseaux'
+    && SkillTheme::find($thDev)['icon'] === 'code');
+check('SkillTheme::find inexistant', SkillTheme::find(424242) === null);
+check('SkillTheme::create sans colonne autorisée lève une exception',
+    throws(fn () => SkillTheme::create(['category_count' => 3]), InvalidArgumentException::class));
+check('SkillTheme : slug en double refusé', throws(fn () => SkillTheme::create(['name' => 'X', 'slug' => 'langues'])));
+SkillTheme::update($thEmpty, ['icon' => 'book', 'category_count' => 9, 'slug' => 'langues']);
+check('SkillTheme::update (liste blanche)', SkillTheme::find($thEmpty)['icon'] === 'book');
+check('SkillTheme::slugExists', SkillTheme::slugExists('langues') && !SkillTheme::slugExists('langues', $thEmpty)
+    && !SkillTheme::slugExists('autre'));
+
+// =============================================================================
 //  SkillCategory / Skill
 // =============================================================================
-$scNet = SkillCategory::create(['name' => 'Réseau', 'slug' => 'reseau', 'icon' => 'network', 'position' => 1]);
-$scLua = SkillCategory::create(['name' => 'Scripting / Lua', 'slug' => 'lua', 'icon' => 'code', 'position' => 0]);
-$scEmpty = SkillCategory::create(['name' => 'Vide', 'slug' => 'vide', 'position' => 2]);
-check('SkillCategory::find', SkillCategory::find($scNet)['icon'] === 'network');
-SkillCategory::update($scNet, ['icon' => 'server', 'skill_count' => 9]);
+$scNet = SkillCategory::create(['theme_id' => $thInfo, 'name' => 'Réseau', 'slug' => 'reseau', 'icon' => 'network', 'position' => 1]);
+$scLua = SkillCategory::create(['theme_id' => $thDev, 'name' => 'Scripting / Lua', 'slug' => 'lua', 'icon' => 'code', 'position' => 0]);
+$scEmpty = SkillCategory::create(['theme_id' => $thInfo, 'name' => 'Vide', 'slug' => 'vide', 'position' => 2]);
+check('SkillCategory::find', SkillCategory::find($scNet)['icon'] === 'network' && (int) SkillCategory::find($scNet)['theme_id'] === $thInfo);
+check('SkillCategory : thème obligatoire', throws(fn () => SkillCategory::create(['name' => 'X', 'slug' => 'x'])));
+check('SkillCategory : thème inexistant refusé', throws(fn () => SkillCategory::create(['theme_id' => 424242, 'name' => 'X', 'slug' => 'x'])));
+SkillCategory::update($scNet, ['icon' => 'server', 'skill_count' => 9, 'theme_name' => 'x']);
 check('SkillCategory::update', SkillCategory::find($scNet)['icon'] === 'server');
 check('SkillCategory::slugExists', SkillCategory::slugExists('lua') && !SkillCategory::slugExists('lua', $scLua)
     && !SkillCategory::slugExists('autre'));
@@ -366,23 +386,74 @@ $sk2 = Skill::create(['category_id' => $scNet, 'name' => 'Routage', 'level' => 2
 $sk3 = Skill::create(['category_id' => $scLua, 'name' => 'Lua', 'level' => 4]);
 check('Skill::find', Skill::find($sk2)['description'] === 'OSPF' && (int) Skill::find($sk1)['level'] === 3);
 check('Skill : niveau hors bornes refusé', throws(fn () => Skill::create(['category_id' => $scNet, 'name' => 'X', 'level' => 9])));
+check('Skill : niveau 0 refusé', throws(fn () => Skill::create(['category_id' => $scNet, 'name' => 'X', 'level' => 0])));
 check('Skill : catégorie inexistante refusée', throws(fn () => Skill::create(['category_id' => 424242, 'name' => 'X', 'level' => 1])));
-check('Skill::all + category_name, triées', ids_of(Skill::all()) === [$sk3, $sk2, $sk1] && Skill::all()[0]['category_name'] === 'Scripting / Lua');
+check('Skill::all + category_name, theme_name, triées par thème',
+    ids_of(Skill::all()) === [$sk3, $sk2, $sk1] && Skill::all()[0]['category_name'] === 'Scripting / Lua'
+    && Skill::all()[0]['theme_name'] === 'Développement');
 Skill::update($sk1, ['level' => 5, 'category_id' => $scLua]);
 check('Skill::update', (int) Skill::find($sk1)['level'] === 5 && (int) Skill::find($sk1)['category_id'] === $scLua);
 Skill::update($sk1, ['category_id' => $scNet]);
+
+// Niveau facultatif (NULL = sans barre) et libellé personnalisé du niveau.
+$skNull = Skill::create(['category_id' => $scLua, 'name' => 'Travail en équipe', 'level' => null, 'position' => 5]);
+$skDef  = Skill::create(['category_id' => $scLua, 'name' => 'Autonomie', 'position' => 6]);
+check('Skill : level NULL accepté', Skill::find($skNull)['level'] === null && Skill::find($skDef)['level'] === null
+    && Skill::find($skNull)['level_label'] === null);
+$skLang = Skill::create(['category_id' => $scLua, 'name' => 'Anglais', 'level' => 2, 'level_label' => 'A2', 'position' => 7]);
+check('Skill : level_label enregistré', Skill::find($skLang)['level_label'] === 'A2' && (int) Skill::find($skLang)['level'] === 2);
+Skill::update($skLang, ['level_label' => 'Langue maternelle', 'level' => 5]);
+check('Skill::update level_label', Skill::find($skLang)['level_label'] === 'Langue maternelle');
+Skill::update($skLang, ['level_label' => null, 'level' => null]);
+check('Skill::update vers NULL', Skill::find($skLang)['level'] === null && Skill::find($skLang)['level_label'] === null);
+check('Skill : level_label > 40 caractères refusé',
+    throws(fn () => Skill::create(['category_id' => $scLua, 'name' => 'X', 'level' => 1, 'level_label' => str_repeat('a', 41)])));
+Skill::delete($skNull);
+Skill::delete($skDef);
+Skill::delete($skLang);
 
 $with = SkillCategory::withSkills();
 check('SkillCategory::withSkills : catégories par position', ids_of($with) === [$scLua, $scNet, $scEmpty]);
 check('SkillCategory::withSkills : skills par position', ids_of($with[1]['skills']) === [$sk2, $sk1] && $with[2]['skills'] === []);
 check('SkillCategory::withSkills : 2 requêtes', query_count(fn () => SkillCategory::withSkills()) === 2);
 $allSc = array_column(SkillCategory::all(), 'skill_count', 'id');
-check('SkillCategory::all + skill_count', $allSc === [$scLua => 1, $scNet => 2, $scEmpty => 0]);
+check('SkillCategory::all + skill_count, triées par thème puis position', $allSc === [$scLua => 1, $scNet => 2, $scEmpty => 0]);
+check('SkillCategory::all + theme_name', array_column(SkillCategory::all(), 'theme_name', 'id')
+    === [$scLua => 'Développement', $scNet => 'Informatique & réseaux', $scEmpty => 'Informatique & réseaux']);
+check('SkillTheme::all + category_count, par position', array_column(SkillTheme::all(), 'category_count', 'id')
+    === [$thDev => 1, $thInfo => 2, $thEmpty => 0]);
+
+// Arborescence : thèmes > sous-catégories > compétences.
+$tree = SkillTheme::tree();
+check('SkillTheme::tree : thèmes par position, thème vide exclu', ids_of($tree) === [$thDev, $thInfo]);
+check('SkillTheme::tree : sous-catégorie vide exclue', ids_of($tree[1]['categories']) === [$scNet]);
+check('SkillTheme::tree : compétences par position', ids_of($tree[1]['categories'][0]['skills']) === [$sk2, $sk1]
+    && ids_of($tree[0]['categories'][0]['skills']) === [$sk3]);
+check('SkillTheme::tree : 3 requêtes', query_count(fn () => SkillTheme::tree()) === 3);
+$full = SkillTheme::tree(true);
+check('SkillTheme::tree(true) : tout est inclus', ids_of($full) === [$thDev, $thInfo, $thEmpty]
+    && ids_of($full[1]['categories']) === [$scNet, $scEmpty] && $full[1]['categories'][1]['skills'] === []
+    && $full[2]['categories'] === []);
+check('SkillTheme::tree(true) : 3 requêtes', query_count(fn () => SkillTheme::tree(true)) === 3);
+
+// Changement de thème d'une sous-catégorie.
+SkillCategory::update($scEmpty, ['theme_id' => $thEmpty]);
+check('SkillCategory::update theme_id', (int) SkillCategory::find($scEmpty)['theme_id'] === $thEmpty
+    && ids_of(SkillTheme::tree(true)[2]['categories']) === [$scEmpty]);
+check('SkillCategory::update vers un thème inexistant refusé', throws(fn () => SkillCategory::update($scEmpty, ['theme_id' => 424242])));
+
+// Suppression : refusée tant que le thème contient des sous-catégories.
+check('SkillTheme::delete non vide => false', SkillTheme::delete($thEmpty) === false && SkillTheme::find($thEmpty) !== null);
+check('SkillTheme : suppression SQL directe bloquée par la clé étrangère',
+    throws(fn () => Database::execute('DELETE FROM skill_themes WHERE id = ?', [$thInfo]), PDOException::class));
 
 check('SkillCategory::delete non vide => false', SkillCategory::delete($scNet) === false && SkillCategory::find($scNet) !== null);
 check('SkillCategory::delete vide => true', SkillCategory::delete($scEmpty) === true && SkillCategory::find($scEmpty) === null);
+check('SkillTheme::delete après vidage => true', SkillTheme::delete($thEmpty) === true && SkillTheme::find($thEmpty) === null);
+check('SkillTheme::delete inexistant => true', SkillTheme::delete($thEmpty) === true);
 check('Skill::delete', Skill::delete($sk3) && Skill::find($sk3) === null && !Skill::delete($sk3));
 check('SkillCategory::delete après vidage', SkillCategory::delete($scLua) === true);
+check('SkillTheme::delete Développement vidé', SkillTheme::delete($thDev) === true && ids_of(SkillTheme::all()) === [$thInfo]);
 
 // =============================================================================
 //  Interest

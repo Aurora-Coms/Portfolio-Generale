@@ -1,23 +1,24 @@
 <?php
 /**
- * Compétences, regroupées par catégorie, avec un niveau de 1 à 5.
+ * Compétences, regroupées par thème puis par sous-catégorie, avec un niveau
+ * de 1 à 5 (ou sans niveau pour le savoir-être et les atouts).
  */
 
 declare(strict_types=1);
 
 namespace App\Controllers\Site;
 
-use App\Models\SkillCategory;
+use App\Models\SkillTheme;
 
 final class SkillController extends SiteController
 {
     public function index(): void
     {
         $this->render('site/skills', [
-            'categories' => SkillCategory::withSkills(),
-            'meta'       => [
+            'themes' => SkillTheme::tree(),
+            'meta'   => [
                 'title'       => 'Compétences',
-                'description' => 'Compétences d\'Alexandre Derbez : réseaux, systèmes Windows et Linux, cybersécurité, scripting Lua et outils, avec un niveau auto-évalué de 1 à 5.',
+                'description' => 'Compétences d\'Alexandre Derbez : réseaux, systèmes, cybersécurité, développement Lua et web, électronique, langues et savoir-être, avec un niveau auto-évalué.',
                 'canonical'   => '/competences',
             ],
         ]);

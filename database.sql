@@ -30,6 +30,7 @@ DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS timeline_entries;
 DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS skill_categories;
+DROP TABLE IF EXISTS skill_themes;
 DROP TABLE IF EXISTS interests;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS settings;
@@ -213,10 +214,32 @@ CREATE TABLE timeline_entries (
     CONSTRAINT chk_timeline_dates CHECK (end_date IS NULL OR end_date >= start_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Catégories de compétences (Réseau, Systèmes, Scripting / Lua…).
--- icon : clé d'icône parmi network, server, code, shield, tools, chip, terminal.
+-- Compétences : trois niveaux d'organisation.
+--   skill_themes      thèmes généraux (Informatique & réseaux, Développement, Langues…)
+--   skill_categories  sous-catégories d'un thème (Réseau, Systèmes, Scripting / Lua…)
+--   skills            compétences d'une sous-catégorie, avec ou sans niveau
+-- Les trois tables sont créées dans cet ordre (clés étrangères).
+
+-- Thèmes généraux de compétences (titres h2 de la page « Compétences »).
+-- icon : clé d'icône du helper icon() (network, code, chip, globe, user, star…).
+CREATE TABLE skill_themes (
+    id          INT UNSIGNED       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(80)        NOT NULL,
+    slug        VARCHAR(90)        NOT NULL COMMENT 'ancre de la page publique : #theme-{slug}',
+    icon        VARCHAR(40)        NULL,
+    position    SMALLINT UNSIGNED  NOT NULL DEFAULT 0,
+    created_at  DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_skill_themes_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sous-catégories de compétences (Réseau, Systèmes, Scripting / Lua…), rangées dans un thème.
+-- icon : clé d'icône du helper icon() (mêmes valeurs que les thèmes) ; position : ordre dans le thème.
+-- ON DELETE RESTRICT : on ne peut pas supprimer un thème qui contient encore des sous-catégories.
 CREATE TABLE skill_categories (
     id          INT UNSIGNED       NOT NULL AUTO_INCREMENT,
+    theme_id    INT UNSIGNED       NOT NULL,
     name        VARCHAR(80)        NOT NULL,
     slug        VARCHAR(90)        NOT NULL,
     icon        VARCHAR(40)        NULL,
@@ -224,16 +247,22 @@ CREATE TABLE skill_categories (
     created_at  DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_skill_categories_slug (slug)
+    UNIQUE KEY uq_skill_categories_slug (slug),
+    KEY idx_skill_categories_theme (theme_id, position),
+    CONSTRAINT fk_skill_categories_theme FOREIGN KEY (theme_id) REFERENCES skill_themes (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Compétences, avec un niveau de 1 (notions) à 5 (maîtrise).
--- ON DELETE RESTRICT : on ne peut pas supprimer une catégorie qui contient encore des compétences.
+-- level NULL : compétence affichée SANS barre de niveau (savoir-être, atouts).
+-- level_label : libellé affiché à la place du libellé standard du niveau
+--   (ex. « A2 » ou « Langue maternelle » pour une langue) ; NULL = libellé standard.
+-- ON DELETE RESTRICT : on ne peut pas supprimer une sous-catégorie qui contient encore des compétences.
 CREATE TABLE skills (
     id           INT UNSIGNED       NOT NULL AUTO_INCREMENT,
     category_id  INT UNSIGNED       NOT NULL,
     name         VARCHAR(80)        NOT NULL,
-    level        TINYINT UNSIGNED   NOT NULL,
+    level        TINYINT UNSIGNED   NULL COMMENT '1 à 5, NULL = sans barre de niveau',
+    level_label  VARCHAR(40)        NULL COMMENT 'libellé personnalisé du niveau (A2, Langue maternelle…)',
     description  VARCHAR(255)       NULL,
     position     SMALLINT UNSIGNED  NOT NULL DEFAULT 0,
     created_at   DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -241,7 +270,7 @@ CREATE TABLE skills (
     PRIMARY KEY (id),
     KEY idx_skills_category (category_id, position),
     CONSTRAINT fk_skills_category FOREIGN KEY (category_id) REFERENCES skill_categories (id) ON DELETE RESTRICT,
-    CONSTRAINT chk_skills_level CHECK (level BETWEEN 1 AND 5)
+    CONSTRAINT chk_skills_level CHECK (level IS NULL OR level BETWEEN 1 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Centres d'intérêt (page À propos). icon : bike, gamepad, code, shield, network, music, book…
@@ -279,7 +308,7 @@ CREATE TABLE messages (
 -- =============================================================================
 --  Contenu initial du site, modifiable ensuite depuis l'administration.
 --  Les textes signalés dans docs/CONTENU-A-VERIFIER.md sont des propositions
---  à relire et corriger (niveaux, détails techniques, missions de stage…).
+--  à relire et corriger (descriptions, détails techniques, missions de stage…).
 --
 --  Les identifiants sont fixés explicitement pour que les liaisons restent
 --  lisibles. Les tables venant d'être recréées ci-dessus, ce bloc peut être
@@ -629,45 +658,93 @@ Formation centrée sur l''installation, la mise en service et la maintenance des
  1, 2);
 
 -- -----------------------------------------------------------------------------
---  Compétences
---    1 Réseau · 2 Systèmes · 3 Scripting / Lua · 4 Cybersécurité · 5 Outils
---  Niveaux : 1 Notions · 2 Bases · 3 Intermédiaire · 4 Avancé · 5 Maîtrise
+--  Compétences : thèmes > sous-catégories > compétences.
+--  Niveaux CONFIRMÉS par Alexandre (novembre 2026).
+--  Échelle : 1 Notions · 2 Bases · 3 Intermédiaire · 4 Avancé · 5 Maîtrise.
+--  Langues : correspondance CECRL indicative A1 = 1, A2 = 2, B1 = 3, B2 = 4,
+--  C1/C2 = 5 ; le libellé (level_label) remplace le libellé standard.
+--  level NULL : compétence sans barre de niveau (savoir-être, autres atouts).
 -- -----------------------------------------------------------------------------
-INSERT INTO skill_categories (id, name, slug, icon, position) VALUES
-(1, 'Réseau',          'reseau',        'network', 1),
-(2, 'Systèmes',        'systemes',      'server',  2),
-(3, 'Scripting / Lua', 'scripting-lua', 'code',    3),
-(4, 'Cybersécurité',   'cybersecurite', 'shield',  4),
-(5, 'Outils',          'outils',        'tools',   5);
+INSERT INTO skill_themes (id, name, slug, icon, position) VALUES
+(1, 'Informatique & réseaux', 'informatique-reseaux', 'network', 1),
+(2, 'Développement',          'developpement',        'code',    2),
+(3, 'Électronique',           'electronique',         'chip',    3),
+(4, 'Langues',                'langues',              'globe',   4),
+(5, 'Savoir-être',            'savoir-etre',          'user',    5),
+(6, 'Autres atouts',          'autres-atouts',        'star',    6);
 
-INSERT INTO skills (id, category_id, name, level, description, position) VALUES
--- 1. Réseau
-( 1, 1, 'Adressage IPv4 et sous-réseaux', 3, 'Plans d''adressage, masques et passerelles, calcul de sous-réseaux.', 1),
-( 2, 1, 'Câblage et brassage',            3, 'Réalisation et test de câbles RJ45, brassage en baie.', 2),
-( 3, 1, 'Commutation et VLAN',            2, 'Configuration de base de commutateurs et de VLAN en travaux pratiques.', 3),
-( 4, 1, 'Routage',                        2, 'Routes statiques et premières notions de routage dynamique.', 4),
-( 5, 1, 'Services réseau (DHCP, DNS)',    2, 'Rôle de ces services et mise en place simple en travaux pratiques.', 5),
--- 2. Systèmes
-( 6, 2, 'Maintenance matériel',           4, 'Diagnostic, remplacement de composants et remise en service de postes, pratiqués en 6 stages.', 1),
-( 7, 2, 'Windows (poste de travail)',     4, 'Installation, configuration, pilotes et dépannage courant.', 2),
-( 8, 2, 'Windows Server',                 2, 'Notions d''Active Directory : comptes, groupes et partages.', 3),
-( 9, 2, 'Linux',                          2, 'Ligne de commande, gestion des fichiers, des droits et des paquets.', 4),
-(10, 2, 'Virtualisation',                 2, 'Création et utilisation de machines virtuelles pour les travaux pratiques.', 5),
--- 3. Scripting / Lua
-(11, 3, 'Lua / Luau',                     4, 'Langage principal de mes jeux : tables, modules, programmation événementielle.', 1),
-(12, 3, 'Roblox Studio',                  4, 'Scripts serveur et client, RemoteEvents, DataStore, interfaces et animations.', 2),
-(13, 3, 'Architecture client / serveur',  3, 'Séparation des rôles et validation côté serveur dans mes jeux.', 3),
-(14, 3, 'Python',                         2, 'Bases : variables, conditions, boucles et fonctions, petits scripts.', 4),
--- 4. Cybersécurité
-(15, 4, 'Hygiène informatique',           3, 'Mots de passe, mises à jour et sauvegardes : bonnes pratiques appliquées en stage.', 1),
-(16, 4, 'Validation côté serveur',        3, 'Contrôle des requêtes des joueurs et lutte contre la triche dans mes jeux Roblox.', 2),
-(17, 4, 'Menaces et attaques courantes',  2, 'Hameçonnage, logiciels malveillants, attaques réseau : les comprendre pour s''en protéger.', 3),
-(18, 4, 'Sécurisation d''un poste',       2, 'Comptes utilisateurs, pare-feu, mises à jour et antivirus.', 4),
--- 5. Outils
-(19, 5, 'Cisco Packet Tracer',            3, 'Simulation et test de réseaux pour les travaux pratiques.', 1),
-(20, 5, 'Wireshark',                      2, 'Capture et lecture de trames pour observer les échanges réseau.', 2),
-(21, 5, 'Outils de diagnostic matériel',  3, 'Tests de mémoire, de disque et d''alimentation en maintenance.', 3),
-(22, 5, 'Git',                            2, 'Suivi des versions d''un projet : commits, historique, dépôt distant.', 4);
+-- Les identifiants 1 à 5 sont ceux des anciennes catégories (liens conservés).
+INSERT INTO skill_categories (id, theme_id, name, slug, icon, position) VALUES
+-- 1. Informatique & réseaux
+( 1, 1, 'Réseau',          'reseau',          'network',  1),
+( 2, 1, 'Systèmes',        'systemes',        'server',   2),
+( 4, 1, 'Cybersécurité',   'cybersecurite',   'shield',   3),
+( 5, 1, 'Outils',          'outils',          'tools',    4),
+-- 2. Développement
+( 3, 2, 'Scripting / Lua', 'scripting-lua',   'code',     1),
+( 6, 2, 'Scripting / Web', 'scripting-web',   'code',     2),
+( 7, 2, 'Autres langages', 'autres-langages', 'terminal', 3),
+-- 3 à 6. Thèmes à une seule sous-catégorie (même nom : le titre n'est pas répété)
+( 8, 3, 'Électronique',    'electronique',    'chip',     1),
+( 9, 4, 'Langues',         'langues',         'globe',    1),
+(10, 5, 'Savoir-être',     'savoir-etre',     'user',     1),
+(11, 6, 'Autres atouts',   'autres-atouts',   'star',     1);
+
+INSERT INTO skills (id, category_id, name, level, level_label, description, position) VALUES
+-- Réseau
+( 1,  1, 'Adressage IPv4 et sous-réseaux',    2, NULL, 'Plans d''adressage, masques et passerelles, calcul de sous-réseaux.', 1),
+( 2,  1, 'Câblage et brassage',               3, NULL, 'Réalisation et test de câbles RJ45, brassage en baie.', 2),
+( 3,  1, 'Commutation et VLAN',               2, NULL, 'Configuration de base de commutateurs et de VLAN en travaux pratiques.', 3),
+( 4,  1, 'Routage',                           2, NULL, 'Routes statiques et premières notions de routage dynamique.', 4),
+( 5,  1, 'Services réseau (DHCP, DNS)',       2, NULL, 'Rôle de ces services et mise en place simple en travaux pratiques.', 5),
+-- Systèmes
+( 6,  2, 'Maintenance matériel',              4, NULL, 'Diagnostic, remplacement de composants et remise en service de postes, pratiqués en 6 stages.', 1),
+( 7,  2, 'Windows (poste de travail)',        3, NULL, 'Installation, configuration, pilotes et dépannage courant.', 2),
+( 8,  2, 'Windows Server / Active Directory', 2, NULL, 'Notions d''Active Directory : comptes, groupes et partages.', 3),
+( 9,  2, 'Linux',                             3, NULL, 'Ligne de commande, gestion des fichiers, des droits et des paquets.', 4),
+(10,  2, 'Virtualisation',                    3, NULL, 'Création et utilisation de machines virtuelles pour les travaux pratiques.', 5),
+-- Cybersécurité
+(15,  4, 'Hygiène informatique',              3, NULL, 'Mots de passe, mises à jour et sauvegardes : bonnes pratiques appliquées en stage.', 1),
+(16,  4, 'Validation côté serveur',           2, NULL, 'Contrôle des requêtes des joueurs et lutte contre la triche dans mes jeux Roblox.', 2),
+(17,  4, 'Menaces et attaques courantes',     1, NULL, 'Premières notions : hameçonnage, logiciels malveillants et attaques réseau, pour mieux s''en protéger.', 3),
+(18,  4, 'Sécurisation d''un poste',          1, NULL, 'Premières notions : comptes utilisateurs, pare-feu, mises à jour et antivirus.', 4),
+-- Outils
+(19,  5, 'Cisco Packet Tracer',               2, NULL, 'Simulation et test de réseaux pour les travaux pratiques.', 1),
+(20,  5, 'Wireshark',                         2, NULL, 'Capture et lecture de trames pour observer les échanges réseau.', 2),
+(21,  5, 'Outils de diagnostic matériel',     3, NULL, 'Tests de mémoire, de disque et d''alimentation en maintenance.', 3),
+(22,  5, 'Git',                               3, NULL, 'Suivi des versions d''un projet : commits, historique, dépôt distant.', 4),
+(23,  5, 'GitHub',                            3, NULL, 'Hébergement de dépôts en ligne : envoi du code, historique des modifications et partage.', 5),
+-- Scripting / Lua
+(11,  3, 'Lua / Luau',                        4, NULL, 'Langage principal de mes jeux : tables, modules, programmation événementielle.', 1),
+(12,  3, 'Roblox Studio',                     4, NULL, 'Scripts serveur et client, RemoteEvents, DataStore, interfaces et animations.', 2),
+(13,  3, 'Architecture client / serveur',     3, NULL, 'Séparation des rôles et validation côté serveur dans mes jeux.', 3),
+-- Scripting / Web
+(24,  6, 'HTML',                              3, NULL, 'Structure d''une page : titres, listes, liens, images, formulaires et balises sémantiques.', 1),
+(25,  6, 'CSS',                               3, NULL, 'Mise en forme et mise en page : couleurs, typographie, flexbox, grilles et adaptation au mobile.', 2),
+(26,  6, 'JavaScript',                        2, NULL, 'Bases du langage : variables, fonctions, événements et modification de la page.', 3),
+(27,  6, 'PHP',                               2, NULL, 'Bases côté serveur : pages dynamiques et traitement de formulaires.', 4),
+(28,  6, 'SQL et bases de données (MySQL)',   2, NULL, 'Tables et relations, requêtes simples pour lire, ajouter et modifier des données.', 5),
+-- Autres langages
+(14,  7, 'Python',                            2, NULL, 'Bases : variables, conditions, boucles et fonctions, petits scripts.', 1),
+(29,  7, 'C / C++',                           2, NULL, 'Bases : variables, conditions, boucles, fonctions et compilation de petits programmes.', 2),
+(30,  7, 'Bash / ligne de commande',          2, NULL, 'Commandes courantes du terminal et petits scripts pour enchaîner des tâches simples.', 3),
+(31,  7, 'Java',                              2, NULL, 'Bases : syntaxe, classes et objets, petits programmes.', 4),
+-- Électronique
+(32,  8, 'Mesures (multimètre, oscilloscope)', 1, NULL, 'Premières notions : mesure de tensions et de courants, observation d''un signal.', 1),
+(33,  8, 'Microcontrôleurs (Arduino, ESP32…)', 2, NULL, 'Bases de la programmation d''une carte : entrées, sorties, capteurs et actionneurs simples.', 2),
+(34,  8, 'Soudure',                           2, NULL, 'Bases de la soudure à l''étain de composants sur une carte électronique.', 3),
+-- Langues (libellé CECRL à la place du libellé standard)
+(35,  9, 'Français',                          5, 'Langue maternelle', NULL, 1),
+(36,  9, 'Anglais',                           2, 'A2',                NULL, 2),
+(37,  9, 'Espagnol',                          1, 'A1',                NULL, 3),
+-- Savoir-être (sans niveau : la description donne un exemple concret)
+(38, 10, 'Travail en équipe',                 NULL, NULL, 'J''ai mené des projets de création de jeux à plusieurs.', 1),
+(39, 10, 'Autonomie',                         NULL, NULL, NULL, 2),
+(40, 10, 'Relation avec les utilisateurs',    NULL, NULL, 'En stage, j''ai accueilli et aidé les utilisateurs, pour des problèmes du quotidien comme pour des problèmes plus complexes.', 3),
+(41, 10, 'Rigueur et organisation',           NULL, NULL, 'Je trie et je respecte un ordre et une méthode de travail.', 4),
+(42, 10, 'Curiosité et autoformation',        NULL, NULL, 'J''ai toujours envie de découvrir les nouvelles technologies.', 5),
+-- Autres atouts (sans niveau)
+(43, 11, 'Formation BIA (brevet d''initiation aéronautique)', NULL, NULL, 'Formation suivie, sans passage du diplôme.', 1);
 
 -- -----------------------------------------------------------------------------
 --  Centres d'intérêt (page À propos)
