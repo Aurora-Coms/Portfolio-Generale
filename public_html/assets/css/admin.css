@@ -2549,8 +2549,7 @@ a.table__link:hover {
 /* === Fin des ajouts thèmes de compétences === */
 
 /* === Ajouts accessibilité (revue clavier, couleurs forcées) === */
-/* Documentation : docs/STYLEGUIDE.md (§ « Accessibilité : barres collantes et
-   couleurs forcées »). */
+/* Documentation : docs/STYLEGUIDE.md, § 1 (état actif) et § 10 (menu mobile). */
 
 /* Barre du haut collante sur téléphone (61 px) : le focus clavier et la cible
    #admin-nav du lien « Menu » sans JS (:target) ne passent plus dessous. */

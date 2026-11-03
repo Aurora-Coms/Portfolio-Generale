@@ -42,6 +42,11 @@ Sommaire :
 - **Lien externe** : `rel="noopener noreferrer"`. N'acceptez que des URL
   `http(s)://` venant de la base (jamais `javascript:`).
 - **Icône seule** : toujours un nom accessible (`aria-label` ou texte `.sr-only`).
+- **État actif** : marquez-le avec `aria-current="page"` (lien) ou
+  `aria-pressed="true"` (bouton bascule), pas seulement par une classe : en
+  mode couleurs forcées (contraste élevé de Windows), les couleurs disparaissent
+  et c'est cet attribut qui fait apparaître un soulignement (fin de `site.css`
+  et de `admin.css`).
 - **Messages flash** : affichés par les gabarits, ne les appelez pas dans les vues.
 
 ---
@@ -63,7 +68,7 @@ Définis sur `:root` (identiques dans `site.css` et `admin.css`) :
 | `--c-text-soft` | `#ABB0C4` | paragraphes secondaires (7.9:1) |
 | `--c-text-muted` | `#8C91A8` | libellés discrets (5.4:1 sur panneau) |
 | `--c-comment` | `#7D839B` | « -- commentaires » (4.5:1 sur panneau ; jamais sur une puce) |
-| `--c-lineno` | `#656B82` | numéros de ligne (décoratifs, `aria-hidden`) |
+| `--c-lineno` | `#7D839B` | numéros de ligne (décoratifs, `aria-hidden`, mais 4.5:1 sur panneau : aucun signalement des outils automatiques) |
 | `--c-accent` | `#C3A6FF` | violet : mot-clé, actif, focus (8.3:1) |
 | `--c-accent-ink` | `#1A1030` | texte posé sur l'accent (8.8:1) |
 | `--c-accent-soft` | `rgba(195,166,255,.14)` | fond accent doux |
@@ -252,7 +257,7 @@ Classes : `.hero` (grille 2 colonnes dès 900 px), `.hero__kicker`,
 | `tabs` | list&lt;string&gt; | onglets secondaires inactifs, ex. `['cardverse.lua']` |
 | `lines` | list&lt;string&gt; | **lignes en HTML déjà sûr** : échappez vous-même avec `e()` |
 | `label` | string | nom accessible (défaut « Extrait de code : {filename} ») |
-| `cursor` | bool | curseur clignotant ▍ en fin de code (défaut `true`) |
+| `cursor` | bool | curseur ▍ en fin de code (défaut `true`) : clignote 4 fois (4,4 s, WCAG 2.2.2) puis reste fixe ; aucun clignotement si mouvement réduit |
 | `class` | string | classes en plus sur la `<figure>` |
 
 Les numéros de ligne sont générés. Coloration Lua : `.tok-kw` (mot-clé,
@@ -502,7 +507,9 @@ liste est vide. Classes : `.gallery__main`, `.gallery__thumbs`,
 
 Façade sans aucune requête vers YouTube avant le clic, mention
 « La vidéo est hébergée par YouTube (youtube-nocookie.com) » et lien
-« Ouvrir sur YouTube ». Classes : `.video`, `__frame`, `__facade`, `__play`,
+« Ouvrir sur YouTube ». La façade est un lien vers `youtube.com/watch?v=ID` :
+sans JS, elle ouvre la vidéo sur YouTube ; avec JS, elle est remplacée par le
+lecteur intégré. Classes : `.video`, `__frame`, `__facade`, `__play`,
 `__label`, `__notice`.
 
 #### Prose (Markdown) : `.prose`
@@ -665,10 +672,11 @@ Chargé en `defer` par le gabarit. Tout est de l'amélioration progressive.
 | `data-categories="slug1 slug2"` | sur chaque carte |
 | `data-filter-empty` | bloc affiché quand aucune carte ne correspond |
 | `data-filter-status` | région `aria-live` : « N projets affichés » |
-| `data-lightbox="groupe"` (sur un `<a href="image">`) | visionneuse `<dialog>` : ←/→, Échap, bouton Fermer, focus rendu au lien. Option `data-caption="…"` (sinon l'`alt` de l'image du lien) |
-| `data-youtube="ID"` + `data-title="…"` (sur un `<button>`) | façade YouTube : au clic seulement, insère l'iframe `youtube-nocookie.com/embed/ID?autoplay=1` |
+| `data-lightbox="groupe"` (sur un `<a href="image">`) | visionneuse `<dialog>` : ←/→, Échap, bouton Fermer, focus rendu au lien. À chaque image, une région `aria-live` annonce sa description puis « image 2 sur 3 ». Option `data-caption="…"` (sinon l'`alt` de l'image du lien) |
+| `data-youtube="ID"` + `data-title="…"` (sur un `<a href="https://www.youtube.com/watch?v=ID">`, repli sans JS) | façade YouTube : au clic seulement, remplace le lien par l'iframe `youtube-nocookie.com/embed/ID?autoplay=1` (Ctrl/Cmd/Maj + clic : lien normal) |
 | `data-maxlength="2000"` (sur un champ) | compteur « 120 / 2000 caractères » relié par `aria-describedby`, annonce l'approche et le dépassement de la limite |
 | `data-focus-error` (sur un `<form>`) | au chargement, focus sur le premier champ `aria-invalid="true"` |
+| (automatique) `.tabs`, `.filters__list` | rangées qui défilent sur téléphone : l'onglet ou la puce focalisé **au clavier** est amené entièrement à l'écran (rien au clic ni au toucher) |
 
 <a id="filtres-de-projets"></a>
 **Filtres de projets** : au clic sur une puce, les cartes sont filtrées sans
@@ -965,7 +973,7 @@ renvoie la liste normalisée.
 | `data-maxlength="160"` | compteur de caractères (comme sur le site) |
 | `data-file-preview` (sur `input[type=file]`) | liste nom + taille (+ miniature) des fichiers choisis ; option `data-max-size="octets"` signale « trop volumineux » |
 | `data-focus-error` (sur un `<form>`) | focus sur le premier champ invalide au chargement |
-| `data-admin-menu-toggle` / `data-admin-menu-link` | menu mobile (dans le gabarit, rien à faire) : sans JS, le lien « Menu » mène à `#admin-nav` (affiché par `:target`) |
+| `data-admin-menu-toggle` / `data-admin-menu-link` | menu mobile (dans le gabarit, rien à faire) : sans JS, le lien « Menu » mène à `#admin-nav` (affiché par `:target`). Avec JS, l'ouverture remonte en haut de page et met le focus sur le premier lien du menu ; la fermeture rend la position de défilement et (Échap) le focus au bouton. La barre du haut collante et la barre `.form__actions--sticky` ne cachent jamais le focus (`scroll-padding` dans `admin.css`) |
 
 ---
 

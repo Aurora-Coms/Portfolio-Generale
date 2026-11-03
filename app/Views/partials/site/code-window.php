@@ -8,7 +8,8 @@
  *   $lines    list<string>  lignes de code EN HTML DÉJÀ SÛR : le développeur échappe lui-même
  *                           le texte avec e() et ajoute les classes tok-kw / tok-str / tok-num / tok-com
  *   $label    string        (optionnel) nom accessible de la figure (défaut : « Extrait de code : {filename} »)
- *   $cursor   bool          (optionnel) curseur clignotant ▍ en fin de dernière ligne (défaut true)
+ *   $cursor   bool          (optionnel) curseur ▍ en fin de dernière ligne (défaut true) : clignote
+ *                           4 fois puis reste fixe (WCAG 2.2.2), aucun clignotement si mouvement réduit
  *   $class    string        (optionnel) classe(s) supplémentaire(s) sur la figure
  */
 
