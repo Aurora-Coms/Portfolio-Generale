@@ -19,9 +19,12 @@
 --       la colonne skills.level_label (libellé du niveau, ex. « A2 »).
 --
 --  Aucune donnée n'est supprimée : projets, messages, compétences, niveaux et
---  descriptions restent tels quels. Les nouvelles sous-catégories et
---  compétences (Scripting / Web, Langues, Savoir-être…) s'ajoutent ensuite
---  depuis l'administration.
+--  descriptions restent tels quels (donc les niveaux de l'ancien
+--  database.sql, dont 9 ont été corrigés par Alexandre depuis). Pour mettre
+--  les compétences à jour (niveaux confirmés, Scripting / Web, Langues,
+--  Savoir-être…), lancez ENSUITE le complément facultatif
+--  2026-11-03-competences-alexandre.sql, ou complétez depuis l'administration
+--  (liste dans docs/MIGRATIONS.md).
 --
 --  Relançable sans risque : chaque étape vérifie d'abord si elle a déjà été
 --  faite (tables, colonnes, index et contraintes lus dans information_schema).

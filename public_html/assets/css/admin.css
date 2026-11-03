@@ -2339,6 +2339,7 @@ a.table__link:hover {
 
 /* Ancres : le titre ciblé n'est pas collé au bord (barre du haut sur mobile). */
 .form-section .section-title[id],
+.skill-theme-group__title[id],
 .cv-card {
     scroll-margin-top: 72px;
 }
@@ -2507,7 +2508,6 @@ a.table__link:hover {
     display: grid;
     grid-template-columns: minmax(0, 1fr); /* le tableau (640 px min.) défile dans .table-wrap */
     gap: 20px;
-    scroll-margin-top: 16px;
 }
 
 .skill-theme-group + .skill-theme-group {

@@ -1428,13 +1428,13 @@ libellé standard partout (texte visible et texte lu).
 
 | Classe | Rôle |
 |---|---|
-| `.theme-nav`, `__list`, `__link` | liens d'ancre vers chaque thème : puces `.chip` (icône + nom + `.chip__count`) qui passent à la ligne ; masqués à l'impression |
+| `.theme-nav`, `__list`, `__link` | liens d'ancre vers chaque thème : puces `.chip` (icône + nom + `.chip__count`) qui passent à la ligne ; un nom long (jusqu'à 80 caractères) passe sur plusieurs lignes **dans** la puce, qui ne dépasse jamais la largeur de l'écran ; masqués à l'impression |
 | `.skill-theme` | section d'un thème, `id="theme-{slug}"` (cible des ancres ; marge haute de défilement fournie par `html { scroll-padding-top }`) |
 | `.skill-theme__head`, `__comment`, `__title`, `__icon` | commentaire `-- {slug}/` décoratif, titre `h2` mono avec pastille d'icône **pleine** (celle des cartes est en fond doux) |
 | `.skill-theme__grid` | cartes des sous-catégories : 1 colonne, 2 dès 640 px, 3 dès 1024 px |
 | `.skill-theme__grid--pairs` | 2 ou 4 cartes : reste sur 2 colonnes (pas de carte isolée) |
 | `.skill-card--wide` + `.skill-list--cols` | thème à **une seule** sous-catégorie du **même nom** (Langues, Savoir-être…) : une carte pleine largeur sans titre répété, compétences en colonnes (auto dès 640 px, 3 dès 1024 px ; une compétence seule prend toute la largeur) |
-| `.skill__level--custom` | libellé personnalisé du niveau en pastille accent bien visible |
+| `.skill__level--custom` | libellé personnalisé du niveau en pastille accent bien visible ; un libellé long (jusqu'à 40 caractères) passe sous le nom (`.skill__head:has(> .skill__level--custom)` en `flex-wrap`), puis à la ligne dans la pastille : jamais de débordement de la carte |
 | `.skill--plain`, `.skill__mark` | compétence sans niveau : coche verte décorative + nom, description en retrait |
 
 La légende `.level-legend` n'est affichée qu'une fois, en haut, et seulement
@@ -1467,7 +1467,7 @@ si au moins une compétence a un niveau.
 
 | Classe (`admin.css`) | Rôle |
 |---|---|
-| `.skill-theme-group`, `__title` | bloc d'un thème (h2) contenant ses `.skill-group` (h3 `.subsection-title`) ; filet entre deux thèmes ; sous-catégories en retrait dès 900 px |
+| `.skill-theme-group`, `__title` | bloc d'un thème (h2) contenant ses `.skill-group` (h3 `.subsection-title`) ; filet entre deux thèmes ; sous-catégories en retrait dès 900 px. Le h2 porte l'`id="theme-{id}"` visé par la navigation `.page-toc` : `scroll-margin-top: 72px` (comme `.form-section .section-title[id]`), il n'est pas caché sous la barre du haut collante sur mobile |
 | `.icon-box--sm` | pastille d'icône 28 px (titre h3) |
 | `.level-cell__label--none` | « Sans niveau » dans la colonne Niveau |
 

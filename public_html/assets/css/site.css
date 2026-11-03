@@ -2868,6 +2868,22 @@ body.has-dialog {
     list-style: none;
 }
 
+/* Nom de thème long (jusqu'à 80 caractères) : la puce ne dépasse jamais la
+   largeur disponible, son texte passe sur plusieurs lignes (.chip impose
+   white-space: nowrap). Sur une ligne, la puce garde ses 40 px de haut. */
+.theme-nav__list > li {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.theme-nav__link {
+    max-width: 100%;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .theme-nav__link .icon {
     flex: none;
     color: var(--c-accent);
@@ -2975,15 +2991,32 @@ body.has-dialog {
 }
 
 /* Libellé personnalisé du niveau (« A2 », « Langue maternelle ») : pastille
-   accent bien visible à la place du libellé standard discret. */
+   accent bien visible à la place du libellé standard discret.
+   Un libellé long (jusqu'à 40 caractères) ne déborde jamais de la carte :
+   white-space: normal annule le nowrap de .skill__level, la pastille ne
+   dépasse pas la largeur de la compétence et son texte passe à la ligne si
+   besoin. Rayon de 12 px : identique à une pastille ronde sur une ligne
+   (24 px de haut), coins arrondis propres sur deux lignes. */
 .skill__level--custom {
+    min-width: 0;
+    max-width: 100%;
     padding: 2px 9px;
     border: 1px solid var(--c-accent);
-    border-radius: 999px;
+    border-radius: 12px;
     background: var(--c-accent-soft);
     color: var(--c-accent);
     font-weight: 500;
     line-height: 1.5;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Pas assez de place à côté du nom : la pastille passe sous le nom au lieu
+   de serrer les deux textes (sans :has(), elle reste à droite et son texte
+   passe à la ligne : jamais de débordement). */
+.skill__head:has(> .skill__level--custom) {
+    flex-wrap: wrap;
+    row-gap: 6px;
 }
 
 /* Compétence sans niveau (savoir-être, atouts) : coche + nom, puis l'exemple
