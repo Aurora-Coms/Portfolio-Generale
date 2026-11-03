@@ -269,7 +269,8 @@
             + '<button type="button" class="lightbox__btn lightbox__prev" aria-label="Image précédente">' + svgIcon('prev') + '</button>'
             + '<figure class="lightbox__figure"><img class="lightbox__img" alt="">'
             + '<figcaption class="lightbox__caption"></figcaption></figure>'
-            + '<p class="lightbox__count" aria-live="polite"></p>'
+            + '<p class="lightbox__count"></p>'
+            + '<p class="sr-only" aria-live="polite" data-lightbox-live></p>'
             + '<button type="button" class="lightbox__btn lightbox__next" aria-label="Image suivante">' + svgIcon('next') + '</button>'
             + '</div>';
         document.body.appendChild(dialog);
@@ -277,6 +278,9 @@
         var img = dialog.querySelector('.lightbox__img');
         var caption = dialog.querySelector('.lightbox__caption');
         var count = dialog.querySelector('.lightbox__count');
+        // Région annoncée par les lecteurs d'écran à chaque changement d'image :
+        // description (alt), puis position. Texte seul (textContent).
+        var live = dialog.querySelector('[data-lightbox-live]');
         var btnClose = dialog.querySelector('.lightbox__close');
         var btnPrev = dialog.querySelector('.lightbox__prev');
         var btnNext = dialog.querySelector('.lightbox__next');
@@ -297,10 +301,12 @@
             img.alt = text;
             caption.textContent = text;
             caption.hidden = text === '';
-            caption.setAttribute('aria-hidden', 'true'); // déjà lu via alt
+            caption.setAttribute('aria-hidden', 'true'); // déjà lu via alt et la région live
             count.textContent = items.length > 1 ? 'Image ' + (index + 1) + ' sur ' + items.length : '';
             btnPrev.hidden = items.length < 2;
             btnNext.hidden = items.length < 2;
+            live.textContent = [text, items.length > 1 ? 'image ' + (index + 1) + ' sur ' + items.length : '']
+                .filter(Boolean).join(', ');
         }
 
         function open(link) {
@@ -356,17 +362,23 @@
     }
 
     /* -------------------------------------------------------------------------
-       6. Vidéo YouTube en façade : bouton [data-youtube="ID"][data-title]
-       Aucune requête vers YouTube avant le clic ; ensuite seulement, l'iframe
-       youtube-nocookie.com est insérée (autorisée par frame-src dans la CSP).
+       6. Vidéo YouTube en façade : lien [data-youtube="ID"][data-title]
+       (href = la vidéo sur youtube.com, repli sans JS). Aucune requête vers
+       YouTube avant le clic ; ensuite seulement, l'iframe youtube-nocookie.com
+       remplace le lien (autorisée par frame-src dans la CSP).
        ---------------------------------------------------------------------- */
     function initYoutube() {
         each('[data-youtube]', function (btn) {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', function (ev) {
+                // Ouverture dans un nouvel onglet : comportement normal du lien.
+                if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) {
+                    return;
+                }
                 var id = btn.getAttribute('data-youtube') || '';
                 if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
                     return;
                 }
+                ev.preventDefault();
                 var iframe = document.createElement('iframe');
                 iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
                 iframe.title = btn.getAttribute('data-title') || 'Vidéo YouTube';

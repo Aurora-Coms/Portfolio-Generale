@@ -2573,3 +2573,52 @@ html:has(.form__actions--sticky) {
         scroll-padding-bottom: 140px;
     }
 }
+
+/* Mode couleurs forcées (contraste élevé de Windows) : le navigateur remplace
+   les couleurs de texte, de fond et de bordure par celles du système.
+   - État actif du menu, de la pagination et des filtres (aria-current) et
+     boutons bascule (aria-pressed) : un soulignement reste visible.
+   - Interrupteur (appearance: none) : la pastille, dessinée par un fond,
+     disparaissait et « activé » ressemblait à « désactivé ». On le dessine
+     avec les couleurs système (forced-color-adjust: none). */
+@media (forced-colors: active) {
+    a[aria-current="page"],
+    a[aria-current="true"],
+    [aria-pressed="true"] {
+        text-decoration: underline 2px;
+        text-underline-offset: .25em;
+    }
+
+    .admin-nav__link {
+        border-left-color: Canvas;
+    }
+
+    .admin-nav__link[aria-current="page"] {
+        border-left-color: Highlight;
+    }
+
+    .switch__input {
+        forced-color-adjust: none;
+        border-color: ButtonText;
+        background: Canvas;
+    }
+
+    .switch__input::before {
+        background: ButtonText;
+    }
+
+    .switch__input:checked {
+        border-color: Highlight;
+        background: Highlight;
+    }
+
+    .switch__input:checked::before {
+        background: HighlightText;
+    }
+
+    .switch__input:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+/* === Fin des ajouts accessibilité === */

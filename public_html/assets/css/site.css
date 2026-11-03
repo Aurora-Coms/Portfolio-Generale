@@ -1777,6 +1777,14 @@ body.has-dialog {
     text-align: center;
 }
 
+/* Façade rendue comme un lien (repli sans JS) : même aspect qu'un bouton,
+   sans soulignement ni changement de couleur au survol. */
+a.video__facade,
+a.video__facade:hover {
+    color: var(--c-text-strong);
+    text-decoration: none;
+}
+
 .video__facade:focus-visible {
     outline-offset: -4px;
 }
@@ -3059,3 +3067,29 @@ body.has-dialog {
     }
 }
 /* === Fin des ajouts thèmes de compétences === */
+
+/* === Ajouts accessibilité : couleurs forcées === */
+/* Mode couleurs forcées (contraste élevé de Windows) : le navigateur remplace
+   les couleurs de texte, de fond et de bordure par celles du système. L'état
+   actif des onglets, puces, liens de pagination et du menu ne reposait que sur
+   ces couleurs : il devenait invisible. Un soulignement, lui, reste affiché.
+   (Le fil d'Ariane n'est pas concerné : sa page courante n'est pas un lien.) */
+@media (forced-colors: active) {
+    a[aria-current="page"],
+    a[aria-current="true"],
+    [aria-pressed="true"] {
+        text-decoration: underline 2px;
+        text-underline-offset: .25em;
+    }
+
+    /* Onglets : les bordures transparentes deviendraient visibles partout ;
+       seule celle de l'onglet actif reste, en couleur système de sélection. */
+    .tabs__link {
+        border-top-color: Canvas;
+    }
+
+    .tabs__link[aria-current="page"] {
+        border-top-color: Highlight;
+    }
+}
+/* === Fin des ajouts accessibilité === */
