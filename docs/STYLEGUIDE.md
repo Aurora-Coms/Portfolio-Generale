@@ -1050,3 +1050,247 @@ Toujours `width`/`height` (pas de décalage de mise en page) et un `alt`.
   lecteur d'écran.
 - **Le menu mobile du site** n'apparaît qu'avec le JS ; sans JS, la rangée
   d'onglets défilante reste la navigation.
+
+---
+
+## Ajouts pages publiques
+
+Composants ajoutés pour les pages publiques (`app/Controllers/Site`,
+`app/Views/site`). Styles : fin de `site.css`, section
+`/* === Ajouts pages publiques === */`. Aucun JavaScript supplémentaire.
+
+### Vues et contrôleurs du site
+
+| Route | Contrôleur | Vue |
+|---|---|---|
+| `/` | `HomeController::index` | `site/home` |
+| `/projets` (301), `/projets/jeux`, `/projets/techniques` | `ProjectController::index`, `games`, `tech` | `site/projects/index` |
+| `/projet/{slug}` | `ProjectController::show` | `site/projects/show` |
+| `/parcours` | `TimelineController::index` | `site/timeline` |
+| `/competences` | `SkillController::index` | `site/skills` |
+| `/a-propos` | `AboutController::index` | `site/about` |
+| `/contact` (GET, POST) | `ContactController::show`, `send` | `site/contact` |
+| `/cv` | `CvController::download` | (fichier PDF) |
+| `/mentions-legales` | `LegalController::index` | `site/legal` |
+| `/sitemap.xml`, `/robots.txt` | `SitemapController::index`, `robots` | (texte) |
+
+Tous héritent de `App\Controllers\Site\SiteController` (lui-même
+`App\Core\Controller`), qui fournit : `cvAvailable()`, `internshipWanted()`,
+`internshipPeriod()` (« 18 mai au 26 juin 2026 »), `internshipSentence()`
+(« du 18 mai au 26 juin 2026 »), `facts()` (bloc « en bref ») et
+`safeUrl()` (URL http/https uniquement).
+
+### Corps de page : `.page-body`
+
+Marge sous `.page-head` quand le contenu suit directement l'en-tête
+(32 px, 44 px dès 900 px).
+
+### Lien de fin de section : `.section-more`
+
+```php
+<p class="section-more"><a class="btn btn--secondary" href="/projets/jeux">Tous les projets<?= icon('arrow') ?></a></p>
+```
+
+### Barre d'outils des projets : `.projects-toolbar` + `.section-switch`
+
+Rangée (qui passe à la ligne) contenant le sélecteur de section et les puces
+de filtre (`site/project-filters`, dont la marge basse est alors annulée).
+Le sélecteur est une `<nav>` d'onglets segmentés ; la section courante porte
+`aria-current="page"` (fond accent).
+
+```php
+<div class="projects-toolbar">
+    <nav class="section-switch" aria-label="Sections de projets">
+        <ul class="section-switch__list">
+            <li><a class="section-switch__link" href="/projets/jeux" aria-current="page"><span class="sr-only">Projets de jeux</span><span aria-hidden="true">jeux/</span></a></li>
+            <li><a class="section-switch__link" href="/projets/techniques"><span class="sr-only">Projets techniques</span><span aria-hidden="true">techniques/</span></a></li>
+        </ul>
+    </nav>
+    <?= partial('site/project-filters', [...]) ?>
+</div>
+```
+
+### Appel à l'action : `.cta`
+
+Carte en bas de page (lien vers l'autre section, contact, CV). Toujours avec
+`.card`. Classes : `.cta__body`, `.cta__comment` (décoratif, `aria-hidden`),
+`.cta__title` (h2), `.cta__text`, `.cta__actions` (peut porter `.btn-row`).
+
+```php
+<aside class="card cta" aria-labelledby="titre-contact">
+    <div class="cta__body">
+        <p class="cta__comment" aria-hidden="true">-- contact.sh</p>
+        <h2 class="cta__title" id="titre-contact">Un stage à me proposer ?</h2>
+        <p class="cta__text">…</p>
+    </div>
+    <div class="cta__actions btn-row">
+        <a class="btn btn--primary" href="/contact"><?= icon('mail') ?>Me contacter</a>
+    </div>
+</aside>
+```
+
+### Échelle des niveaux : `.level-legend`
+
+Carte (`.card.card--pad.level-legend`) avec un titre `.level-legend__title`
+et une liste `<ol class="level-legend__list">` de `.level-legend__item` :
+barre `.meter.level-N` décorative (`aria-hidden`) + `.level-legend__label`
+contenant `.level-legend__num` (chiffre orange) et `level_label(N)`.
+
+### Page détail d'un projet
+
+| Classe | Rôle |
+|---|---|
+| `.project-head__path` | chemin de fichier `-- roblox/…/tardis.lua` (avec `.comment`, `aria-hidden`) entre le fil d'Ariane et le h1 |
+| `.inline-list` | liste en ligne séparée par des virgules décoratives (catégories dans l'aside) |
+| `.detail-aside__actions` | boutons empilés en bas de l'aside (lien externe, retour à la liste) |
+
+### Divers
+
+| Classe | Rôle |
+|---|---|
+| `.availability` | point vert « ● » de disponibilité (à mettre en `aria-hidden`) |
+| `.hero__code--full` / `.hero__code--compact` | sur `site/code-window` (paramètre `class`) : version complète dès 640 px, version courte sur téléphone (une seule affichée) |
+
+### Mentions légales : `.legal`
+
+Grille sommaire + contenu (sommaire collant à gauche dès 1024 px).
+Classes : `.legal__toc` (avec `.card.card--pad`), `.legal__toc-title`,
+`.legal__toc-list` (liens d'ancre), `.legal__content`, `.legal__section`
+(chaque section a un `id` : `editeur`, `hebergement`, `propriete`,
+**`donnees`** (cible du lien RGPD du formulaire), `cookies`, `securite`),
+`.legal__address`, `.legal__updated`. Titres : `.content-block__title`,
+texte : `.prose`.
+
+### Correctifs généraux (section « Ajouts pages publiques »)
+
+- `.filters__list { position: relative }` : les textes `.sr-only` des puces
+  restent dans la liste qui défile (sinon débordement horizontal de 29 px sur
+  mobile dès qu'une puce sort de l'écran, voir § 13).
+- `.form-row > .field { align-content: start }` : dans une rangée de deux
+  champs, l'aide ou l'erreur d'un champ n'étire plus la hauteur du champ
+  voisin.
+
+### Formulaire de contact : contrat
+
+Champs envoyés à `POST /contact` : `_csrf`, `form_ts` (jeton horodaté signé
+`horodatage.hmac`, généré à chaque affichage), `name` (≤ 100), `email`,
+`subject` (facultatif, ≤ 150 ; « Message depuis le portfolio » par défaut),
+`message` (10 à 5000), `consent` (`1`), `website` (champ piège, doit rester
+vide). Erreur générale (jeton, limite d'envoi) : clé `_form` de `$errors`.
+Codes : 303 (succès, réel ou simulé pour un robot), 419 (CSRF), 422
+(validation ou jeton), 429 (3 messages / 10 min ou 10 / 24 h par IP).
+
+---
+
+## Ajouts administration (lot B)
+
+Parcours, compétences, catégories de compétences, centres d'intérêt,
+« À propos », messages, réglages et CV, compte (mot de passe, double
+authentification). Styles : fin de `admin.css`, section
+`/* === Ajouts admin lot B === */` ; scripts : fin de `admin.js`, même titre.
+
+### 8 ter. Composants
+
+#### Choix d'une icône : `partial('admin/icon-picker')`
+
+Boutons radio dont chaque libellé montre l'icône réelle (`icon()`) : aucun
+JavaScript, utilisable au clavier (flèches), focus visible sur la tuile.
+
+| Variable | Type | Description |
+|---|---|---|
+| `name` | string | nom du champ (défaut `'icon'`) |
+| `legend` | string | titre du groupe (`<legend>`) |
+| `options` | array | `['network' => 'Réseau', …]` : nom d'icône => libellé |
+| `value` | string | icône cochée (`old($old, 'icon')`) |
+| `error`, `hint` | string | erreur / aide (reliées par `aria-describedby`) |
+| `required` | bool | astérisque + `required` |
+| `id` | string | id du fieldset (défaut `f-{name}`) ; radios `f-{name}-{icône}` |
+
+```php
+<?= partial('admin/icon-picker', ['name' => 'icon', 'legend' => 'Icône', 'required' => true,
+    'options' => ['network' => 'Réseau', 'shield' => 'Sécurité'], 'value' => old($old, 'icon'),
+    'error' => $errors['icon'] ?? '']) ?>
+```
+
+Classes : `.icon-picker`, `__list`, `__item`, `__input` (radio réel, invisible
+mais focalisable), `__label`, `__preview`, `__name`, `__code`. Listes blanches
+d'icônes : `SkillCategoryController::ICONS`, `InterestController::ICONS`.
+
+#### Classes ajoutées
+
+| Classe | Rôle |
+|---|---|
+| `.icon-box` | pastille carrée 36 px (fond accent doux) autour d'un `icon()` dans un tableau ou un titre |
+| `.table__icon` | cellule de tableau étroite contenant une `.icon-box` |
+| `.list-note` (`--top`) | petite note sous (ou au-dessus d') une liste, avec `.form__note` |
+| `.meter`, `.meter__seg`, `.meter.level-N` | niveau en 5 segments (mêmes classes que le site, largeur 96 px) : utilisez `partial('site/skill-meter')` |
+| `.level-cell`, `__label` | segments + texte « 4/5 · Avancé » (texte `aria-hidden`, le partial fournit le texte lu) |
+| `.skill-group`, `__title` | bloc d'une catégorie (titre + tableau), à combiner avec `.list-head` (lot A) |
+| `.empty-inline` | petit état vide en pointillés dans une section |
+| `.period-preview`, `__label`, `__value` | aperçu de la période d'une entrée du parcours (voir `data-period-preview`) |
+| `.edit-layout` | formulaire + aperçu côte à côte dès 1200 px |
+| `.message-layout` | message + colonne d'informations (320 px) dès 1024 px |
+| `.message-body--html` | à ajouter à `.message-body` quand le corps est passé par `nl2br(e(…))` : annule `pre-wrap` (sinon chaque retour à la ligne est doublé) |
+| `.message-cell`, `__subject` | cellule « sujet + extrait » de la liste des messages |
+| `.dl--stacked` | `.dl` toujours sur une colonne (colonnes étroites) |
+| `.break` | coupe les longues chaînes (adresses e-mail) |
+| `.page-toc` | sommaire d'ancres en haut d'une longue page (liens `.btn--ghost.btn--sm` dans un `ul.cluster`) |
+| `.cv-card` | carte du CV (marge haute, ancre `#cv`) |
+| `.icon--flip` | icône retournée (`download` utilisée comme « envoyer ») : `icon('download', 16, 'icon icon--flip')` |
+| `.account-grid` | deux cartes côte à côte dès 1024 px |
+| `.card--inset` | carte dans une carte (fond plus sombre, contenu aligné en haut) |
+| `.card--danger` | bordure rouge discrète (action dangereuse) |
+| `.subsection-title` | titre `h3` mono dans une carte |
+| `.measure` | largeur de lecture limitée (72 caractères) |
+| `.form--narrow` | formulaire court limité à 460 px |
+| `.steps`, `__item`, `__title` | étapes numérotées automatiquement (pastille violette) |
+| `.app-list` | liste d'applications (nom + plateformes en `.text-muted`) |
+| `.qr-setup`, `__code` | QR code + explications côte à côte dès 760 px |
+| `.secret-key` | clé TOTP en groupes de 4 (`<code>`), sélection d'un seul geste |
+| `.codes-card` | carte des codes de secours (720 px max ; à l'impression, seuls les codes restent) |
+
+Correctif général : `.form-row > .field { align-content: start; }`. Dans une
+rangée de champs, le champ le plus court (sans aide ni compteur) ne s'étire
+plus en hauteur.
+
+#### Pages et contrôleurs
+
+| Route | Contrôleur | Vues (`app/Views/admin/…`) |
+|---|---|---|
+| `/admin/parcours` (resource) | `TimelineController` | `timeline/index`, `timeline/form` |
+| `/admin/competences/categories` (resource) | `SkillCategoryController` | `skill-categories/index`, `skill-categories/form` |
+| `/admin/competences` (resource, `?categorie=ID` présélectionne la catégorie) | `SkillController` | `skills/index`, `skills/form` |
+| `/admin/interets` (resource) | `InterestController` | `interests/index`, `interests/form` |
+| `/admin/a-propos` | `AboutController` | `about/edit` |
+| `/admin/messages`, `/{id}`, `/{id}/lu`, `/{id}/supprimer` | `MessageController` | `messages/index`, `messages/show` |
+| `/admin/reglages`, `/cv`, `/cv/supprimer` | `SettingsController` | `settings/edit` |
+| `/admin/compte`, `/mot-de-passe`, `/2fa`, `/2fa/desactiver`, `/2fa/codes` | `AccountController` | `account/index`, `account/two-factor`, `account/recovery-codes` |
+
+Points à connaître :
+
+- Les formulaires ont `novalidate` : la validation de référence est celle du
+  serveur (messages en français, statut 422, saisie conservée).
+- Messages : le bouton lu / non lu et la suppression envoient le champ caché
+  `page` pour revenir à la même page de la liste. La liste lance la purge RGPD
+  (`Message::purgeOlderThan(12)`) à chaque ouverture.
+- Le lien « Répondre » est construit côté serveur (adresse revérifiée par
+  `filter_var`, parties encodées par `rawurlencode`) : jamais de `mailto:`
+  assemblé dans la vue.
+- Réglages : le formulaire du CV a pour action `/admin/reglages/cv#cv` : en cas
+  d'erreur (statut 422), le navigateur revient directement sur la carte du CV.
+- Compte : chaque action sensible redemande le mot de passe actuel ; 5 échecs
+  en 15 min (mot de passe ou code) bloquent ces actions (`Throttle`, action
+  `reauth`). Les champs de ces formulaires ont des noms distincts
+  (`current_password`, `codes_password`, `disable_password`, `disable_code`)
+  car ils sont sur la même page.
+- Les codes de secours sont rendus directement dans la réponse au POST
+  (jamais en session ni après redirection).
+
+### 10 ter. Comportements JavaScript (`admin.js`, section lot B)
+
+| Attribut | Effet |
+|---|---|
+| `data-period-preview` + `data-start="#f-start_date"`, `data-end="#f-end_date"`, `data-precision="#f-date_precision"`, enfant `[data-period-output]` (un `<output aria-live="polite">`) | aperçu en direct de la période, même format que `period_fr()` (« 18 mai 2026 → en cours ») ; signale une fin avant le début. Le serveur rend la valeur initiale |
+| `data-copy-target="#id"` (sur un `<button hidden>`) + `data-copy-done="Codes copiés"` | bouton affiché seulement si le presse-papiers est disponible ; copie les `<li>` de la cible, un par ligne, et l'annonce dans `[data-copy-status]` (région `aria-live`) |
+| `data-print` (sur un `<button hidden>`) | bouton « Imprimer » affiché avec JS seulement |
+| plusieurs `form[data-focus-error]` sur une page | si rien n'a le focus au chargement, il va au premier champ `aria-invalid="true"` de la page, quel que soit le formulaire (le comportement de base ne regarde que le premier formulaire) |

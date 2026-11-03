@@ -2549,3 +2549,305 @@ body.has-dialog {
         transform: none;
     }
 }
+
+/* === Ajouts pages publiques === */
+/* Composants propres aux pages publiques (contrôleurs App\Controllers\Site).
+   Documentés dans docs/STYLEGUIDE.md, section « Ajouts pages publiques ». */
+
+/* Corps d'une page intérieure, sous l'en-tête (.page-head). */
+.page-body {
+    margin-top: 32px;
+}
+
+@media (min-width: 900px) {
+    .page-body {
+        margin-top: 44px;
+    }
+}
+
+/* Lien « Tous les projets » / « Tout le parcours » sous une section. */
+.section-more {
+    display: flex;
+    margin-top: 24px;
+}
+
+/* Correctif : les textes .sr-only des puces doivent rester dans la liste qui
+   défile (sinon la page déborde horizontalement sur mobile, voir STYLEGUIDE §13). */
+.filters__list {
+    position: relative;
+}
+
+/* Correctif : dans une rangée de champs, un champ voisin plus haut (aide ou
+   erreur) ne doit pas étirer la hauteur du champ de saisie. */
+.form-row > .field {
+    align-content: start;
+}
+
+/* Fenêtre de code de l'accueil : version courte sur téléphone (maquette mobile),
+   version complète dès 640 px. Une seule des deux est affichée (et lue). */
+.hero__code--full {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .hero__code--compact {
+        display: none;
+    }
+
+    .hero__code--full {
+        display: block;
+    }
+}
+
+/* Barre d'outils des listes de projets : sélecteur de section + filtres. */
+.projects-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    margin: 28px 0 24px;
+}
+
+.projects-toolbar > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.projects-toolbar .filters {
+    margin-bottom: 0;
+}
+
+@media (min-width: 900px) {
+    .projects-toolbar {
+        margin: 36px 0 28px;
+    }
+}
+
+/* Sélecteur de section « jeux/ | techniques/ » (onglets segmentés). */
+.section-switch__list {
+    display: inline-flex;
+    margin: 0;
+    padding: 3px;
+    list-style: none;
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--c-panel-2);
+}
+
+.section-switch__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius);
+    color: var(--c-text-soft);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--t-fast) ease, background-color var(--t-fast) ease;
+}
+
+.section-switch__link:hover {
+    color: var(--c-text-strong);
+    background: var(--c-hover);
+}
+
+.section-switch__link[aria-current="page"] {
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+}
+
+/* Appel à l'action en bas de page (contact, CV, autre section). */
+.cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 32px;
+    margin-top: 56px;
+    padding: 20px;
+}
+
+.cta__body {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.cta__comment {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--c-comment);
+}
+
+.cta__title {
+    margin-top: 4px;
+    font-size: 20px;
+}
+
+.cta__text {
+    margin-top: 8px;
+    max-width: 62ch;
+    color: var(--c-text-soft);
+}
+
+.cta__actions {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+@media (min-width: 900px) {
+    .cta {
+        margin-top: 80px;
+        padding: 28px 32px;
+    }
+
+    .cta__title {
+        font-size: 24px;
+    }
+}
+
+/* Échelle des niveaux de compétence (page Compétences). */
+.level-legend__list {
+    display: grid;
+    gap: 10px 24px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.level-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--c-text-soft);
+}
+
+.level-legend__item .meter {
+    flex: none;
+    width: 92px;
+    margin-top: 0;
+}
+
+.level-legend__num {
+    font-family: var(--font-mono);
+    color: var(--c-number);
+}
+
+@media (min-width: 640px) {
+    .level-legend__list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+/* Page détail d'un projet : chemin de fichier, liste en ligne, actions. */
+.project-head__path {
+    margin-top: 20px;
+}
+
+.project-head .breadcrumb + .project-head__path {
+    margin-top: 20px;
+}
+
+.inline-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.inline-list > li + li::before {
+    content: ", ";
+    content: ", " / "";
+    white-space: pre;
+    color: var(--c-text-muted);
+}
+
+.detail-aside__actions {
+    display: grid;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+/* Disponibilité (point vert « ● »), comme dans la barre d'état. */
+.availability {
+    color: var(--c-string);
+}
+
+/* Mentions légales : sommaire + sections. */
+.legal {
+    display: grid;
+    gap: 32px;
+    margin-top: 32px;
+}
+
+.legal__toc-title {
+    font-size: 15px;
+}
+
+.legal__toc-list {
+    margin: 10px 0 0;
+    padding-left: 1.6em;
+    font-size: 15px;
+}
+
+.legal__toc-list > li + li {
+    margin-top: 6px;
+}
+
+.legal__toc-list > li::marker {
+    color: var(--c-number);
+    font-family: var(--font-mono);
+    font-size: .9em;
+}
+
+.legal__toc-list a {
+    color: var(--c-text-soft);
+}
+
+.legal__toc-list a:hover {
+    color: var(--c-text-strong);
+}
+
+.legal__content {
+    min-width: 0;
+}
+
+.legal__section + .legal__section {
+    margin-top: 40px;
+}
+
+.legal__address {
+    font-style: normal;
+}
+
+.legal__updated {
+    margin-top: 40px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--c-comment);
+}
+
+@media (min-width: 1024px) {
+    .legal {
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+        margin-top: 44px;
+    }
+
+    .legal__toc {
+        position: sticky;
+        top: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .section-switch__link {
+        transition: none;
+    }
+}
+/* === Fin des ajouts pages publiques === */

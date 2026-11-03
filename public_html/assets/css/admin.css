@@ -1828,3 +1828,656 @@ a.table__title:hover {
         scroll-behavior: auto !important;
     }
 }
+
+/* === Ajouts admin lot A === */
+/* Connexion, tableau de bord, projets, images, catégories, tags.
+   Documentation : docs/STYLEGUIDE.md, § 8 bis. */
+
+/* Barre de filtres (liens .btn) : l'entrée active porte aria-current="page". */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.filter-bar .btn[aria-current="page"] {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+}
+
+.filter-bar__count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--c-text-muted);
+}
+
+.filter-bar .btn[aria-current="page"] .filter-bar__count {
+    color: inherit;
+}
+
+/* Bouton bascule enfoncé (partial admin/post-button avec 'pressed' => true). */
+.btn[aria-pressed="true"] {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+}
+
+.btn[aria-pressed="true"]:hover {
+    background: rgba(195, 166, 255, .24);
+    color: var(--c-accent-hover);
+}
+
+/* Titre de liste + bouton à droite (ex. « Jeux (Roblox) » + « Ajouter »). */
+.list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+}
+
+.list-head .section-title {
+    margin-bottom: 0;
+}
+
+/* En-tête de ligne d'un tableau (<th scope="row">) : même rendu qu'une cellule. */
+.table tbody th {
+    font-weight: 400;
+}
+
+/* Liste d'alertes statiques (points de vigilance du tableau de bord). */
+.alert-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Liste d'éléments dans une carte (derniers messages, brouillons). */
+.item-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item-list__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.item-list__item:last-child {
+    border-bottom: 0;
+}
+
+.item-list__main {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.item-list__title {
+    font-weight: 600;
+    color: var(--c-text-strong);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+a.item-list__title:hover {
+    color: var(--c-accent);
+    text-decoration: underline;
+}
+
+.item-list__meta {
+    font-size: 13px;
+    color: var(--c-text-muted);
+}
+
+.item-list__item.is-unread .item-list__title::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    vertical-align: middle;
+}
+
+@media (min-width: 900px) {
+    .item-list__item {
+        padding-inline: 22px;
+    }
+}
+
+/* Zone de suppression en bas d'un formulaire de modification. */
+.danger-zone {
+    margin-top: 28px;
+    border-color: rgba(255, 143, 143, .35);
+}
+
+/* Bloc repliable (<details>) : ex. « Utiliser un code de secours ». */
+.disclosure {
+    margin-top: 20px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-panel-2);
+}
+
+.disclosure > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    cursor: pointer;
+    color: var(--c-text-soft);
+    font-size: 14px;
+    font-weight: 500;
+    list-style: none;
+}
+
+.disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.disclosure > summary::before {
+    content: "▸";
+    content: "▸" / "";
+    color: var(--c-accent);
+    transition: transform var(--t-fast) ease;
+}
+
+.disclosure[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.disclosure > summary:hover {
+    color: var(--c-text-strong);
+}
+
+.disclosure__body {
+    display: grid;
+    gap: 14px;
+    padding: 4px 14px 16px;
+}
+
+/* Lien secondaire sous un formulaire d'authentification. */
+.auth-card__alt {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Saisie d'un code à 6 chiffres (double authentification). */
+.input--code {
+    font-size: 22px;
+    letter-spacing: .3em;
+    text-align: center;
+}
+
+/* Lien secondaire sous le titre d'une ligne (ex. adresse publique du projet). */
+a.table__link {
+    color: var(--c-text-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--c-border-strong);
+}
+
+a.table__link:hover {
+    color: var(--c-accent);
+    text-decoration-color: currentColor;
+}
+
+/* Rangée de boutons alignés d'une ligne de tableau à l'autre : les boutons texte
+   (« Publier » / « Masquer »…) ont une largeur minimale commune. */
+.btn-row--even > .btn:not(.btn--icon),
+.btn-row--even > .inline-form > .btn:not(.btn--icon) {
+    min-width: 108px;
+}
+
+/* === Ajouts admin lot B === */
+/* Parcours, compétences, centres d'intérêt, à propos, messages, réglages, compte.
+   Documentation : docs/STYLEGUIDE.md, § 8 ter. */
+
+/* Champs côte à côte de hauteurs différentes (aide, compteur) : le champ le plus
+   court ne s'étire pas (sinon sa zone de saisie grandit et les espaces s'élargissent). */
+.form-row > .field {
+    align-content: start;
+}
+
+/* Note sous (ou au-dessus d') une liste : « 5 entrées… ». */
+.list-note {
+    margin-top: 12px;
+}
+
+.list-note--top {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+/* Petite pastille d'icône (catégorie de compétences, centre d'intérêt). */
+.icon-box {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+}
+
+.table__icon {
+    width: 1%;
+}
+
+/* Sélecteur d'icône : boutons radio avec aperçu (partial admin/icon-picker). */
+.icon-picker__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.icon-picker__item {
+    position: relative;
+}
+
+/* Radio réel, invisible mais focalisable : le libellé sert de surface cliquable. */
+.icon-picker__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.icon-picker__label {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    min-height: 52px;
+    padding: 8px 10px;
+    border: 1px solid var(--c-input-border);
+    border-radius: var(--radius);
+    background: var(--c-panel-2);
+    color: var(--c-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color var(--t-fast) ease, background-color var(--t-fast) ease;
+}
+
+.icon-picker__preview {
+    grid-row: span 2;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    background: var(--c-chip);
+    color: var(--c-text-soft);
+}
+
+.icon-picker__name {
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.25;
+    overflow-wrap: normal;
+}
+
+.icon-picker__code {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--c-text-muted);
+}
+
+.icon-picker__input:hover + .icon-picker__label {
+    border-color: var(--c-text-muted);
+}
+
+.icon-picker__input:checked + .icon-picker__label {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+    color: var(--c-text-strong);
+}
+
+.icon-picker__input:checked + .icon-picker__label .icon-picker__preview {
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+}
+
+.icon-picker__input:focus-visible + .icon-picker__label {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+}
+
+.icon-picker__input[aria-invalid="true"] + .icon-picker__label {
+    border-color: var(--c-error);
+}
+
+/* Aperçu de la période d'une entrée du parcours (admin.js : data-period-preview). */
+.period-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    padding: 10px 12px;
+    border: 1px dashed var(--c-border-strong);
+    border-radius: var(--radius);
+    background: var(--c-panel-2);
+    font-size: 14px;
+}
+
+.period-preview__label {
+    color: var(--c-text-muted);
+}
+
+.period-preview__value {
+    font-family: var(--font-mono);
+    color: var(--c-number);
+}
+
+/* Niveau de compétence en 5 segments (mêmes classes que le site : .meter.level-N). */
+.meter {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    width: 96px;
+}
+
+.meter__seg {
+    height: 6px;
+    border-radius: 2px;
+    background: var(--c-chip);
+    box-shadow: inset 0 0 0 1px var(--c-border-strong);
+}
+
+.meter.level-1 .meter__seg:nth-child(-n + 1),
+.meter.level-2 .meter__seg:nth-child(-n + 2),
+.meter.level-3 .meter__seg:nth-child(-n + 3),
+.meter.level-4 .meter__seg:nth-child(-n + 4),
+.meter.level-5 .meter__seg:nth-child(-n + 5) {
+    background: var(--c-accent);
+    box-shadow: none;
+}
+
+.level-cell {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.level-cell__label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--c-text-soft);
+    white-space: nowrap;
+}
+
+/* Compétences groupées par catégorie : mêmes largeurs de colonnes d'un tableau à l'autre. */
+@media (min-width: 900px) {
+    .skill-group .table {
+        table-layout: fixed;
+    }
+
+    .skill-group .table th:nth-child(2) { width: 190px; }
+    .skill-group .table th:nth-child(3) { width: 90px; }
+    .skill-group .table th:nth-child(4) { width: 120px; }
+}
+
+.skill-group > * + * {
+    margin-top: 12px;
+}
+
+.skill-group__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.empty-inline {
+    padding: 14px 16px;
+    border: 1px dashed var(--c-border-strong);
+    border-radius: var(--radius-lg);
+    color: var(--c-text-muted);
+    font-size: 14px;
+}
+
+/* Formulaire + aperçu côte à côte sur grand écran (page « À propos »). */
+.edit-layout {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (min-width: 1200px) {
+    .edit-layout {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+}
+
+/* Messages : extrait dans la liste, lecture + informations. */
+.message-cell {
+    min-width: 220px;
+    max-width: 440px;
+}
+
+.message-cell__subject {
+    display: block;
+}
+
+.message-layout {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .message-layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+}
+
+/* Corps déjà converti par nl2br(e(…)) : pas de pre-wrap (sinon lignes doublées). */
+.message-body--html {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Liste de définitions toujours empilée (colonnes étroites). */
+@media (min-width: 640px) {
+    .dl--stacked .dl__row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2px;
+    }
+}
+
+.break {
+    overflow-wrap: anywhere;
+}
+
+/* Sommaire d'une longue page (liens d'ancre). */
+.page-toc {
+    margin-bottom: 16px;
+}
+
+.page-toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Ancres : le titre ciblé n'est pas collé au bord (barre du haut sur mobile). */
+.form-section .section-title[id],
+.cv-card {
+    scroll-margin-top: 72px;
+}
+
+.cv-card {
+    margin-top: 24px;
+}
+
+/* Icône retournée (ex. « download » utilisée comme « envoyer »). */
+.icon--flip {
+    transform: rotate(180deg);
+}
+
+/* Compte : deux cartes côte à côte sur grand écran. */
+.account-grid {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .account-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+.card--inset {
+    align-content: start; /* formulaire en grille dans une rangée étirée : pas d'espaces géants */
+    background: var(--c-panel-2);
+}
+
+.card--danger {
+    border-color: rgba(255, 143, 143, .35);
+}
+
+.subsection-title {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.measure {
+    max-width: 72ch;
+}
+
+/* Formulaire court (quelques champs) : largeur limitée sur grand écran. */
+.form--narrow {
+    max-width: 460px;
+}
+
+/* Étapes numérotées (activation de la double authentification). */
+.steps {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: etape;
+}
+
+.steps__item {
+    counter-increment: etape;
+}
+
+.steps__item > * + * {
+    margin-top: 12px;
+}
+
+.steps__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.steps__title::before {
+    content: counter(etape);
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+    font-size: 14px;
+}
+
+.app-list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.app-list .text-muted {
+    font-size: 13px;
+}
+
+.qr-setup {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+}
+
+.qr-setup__code {
+    justify-self: center;
+}
+
+@media (min-width: 760px) {
+    .qr-setup {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+}
+
+/* Clé TOTP en groupes de 4 caractères : lisible, sélectionnable d'un geste. */
+.secret-key {
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: 15px;
+    letter-spacing: .08em;
+    word-spacing: .3em;
+    line-height: 1.7;
+    color: var(--c-text-strong);
+    user-select: all;
+    overflow-wrap: anywhere;
+}
+
+.codes-card {
+    max-width: 720px;
+}
+
+/* .codes remet sa marge à 0 : on rétablit l'espacement de .stack. */
+.stack > * + .codes {
+    margin-top: 16px;
+}
+
+@media print {
+    .admin-topbar,
+    .admin-sidebar,
+    .page-header__back,
+    .codes-card .btn-row,
+    .codes-card .card__foot {
+        display: none !important;
+    }
+
+    .codes,
+    .codes-card {
+        color: #000;
+        background: #FFF;
+        border-color: #000;
+    }
+}
