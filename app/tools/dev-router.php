@@ -43,6 +43,9 @@ $deny = static function (): never {
 if (preg_match('#(^|/)\.(?!well-known/)#', $path)) {
     $deny();
 }
+if (preg_match('#^/(app|storage)(/|$)#i', $path)) {
+    $deny();
+}
 if (preg_match('/\.(sql|bak|old|orig|save|swp|log|ini|sh|md|lock|dist|env|example|tar|gz|zip)$/i', $path)) {
     $deny();
 }

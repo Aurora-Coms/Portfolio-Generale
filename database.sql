@@ -52,6 +52,7 @@ CREATE TABLE admins (
     totp_secret_enc  VARCHAR(255)     NULL     COMMENT 'Secret TOTP chiffré (AES-256-GCM avec app_key)',
     totp_enabled     TINYINT(1)       NOT NULL DEFAULT 0,
     totp_last_step   BIGINT UNSIGNED  NULL     COMMENT 'Dernier pas TOTP accepté (anti-rejeu)',
+    session_version  INT UNSIGNED     NOT NULL DEFAULT 1 COMMENT 'Incrémentée pour déconnecter les autres sessions',
     last_login_at    DATETIME         NULL,
     created_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

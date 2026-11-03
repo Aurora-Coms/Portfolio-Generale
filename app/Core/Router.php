@@ -58,6 +58,13 @@ final class Router
         // Normalisation : « /parcours/ » => redirection vers « /parcours ».
         if ($path !== '/' && str_ends_with($path, '/')) {
             $target = rtrim($path, '/');
+            // Vrai dossier public (/assets/, /uploads/…) : le serveur web ajoute
+            // lui-même la barre finale ; rediriger sans elle créerait une boucle.
+            // On répond 404 (pas de listing).
+            $real = $target !== '' ? realpath(PUBLIC_PATH . $target) : false;
+            if ($real !== false && is_dir($real) && str_starts_with($real . DIRECTORY_SEPARATOR, PUBLIC_PATH . DIRECTORY_SEPARATOR)) {
+                throw new HttpException(404);
+            }
             $query  = (string) ($_SERVER['QUERY_STRING'] ?? '');
             redirect(($target === '' ? '/' : $target) . ($query !== '' ? '?' . $query : ''), 301);
         }

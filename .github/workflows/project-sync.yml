@@ -1,0 +1,118 @@
+# Range les issues et les pull requests du dépôt dans le projet GitHub
+# « Portfolio » (organisation Aurora-Coms, projet n°6) et remplit ses champs
+# (Status, Priority, Size, Estimate, dates, Iteration).
+#
+# Le travail est fait par .github/scripts/sync-project.js, à partir de
+# .github/project-items.json. Mise en route et dépannage : docs/PROJET-GITHUB.md
+#
+# Prérequis : un secret de dépôt PROJECT_TOKEN contenant un jeton qui a le droit
+# « Projects : Read and write » sur l'organisation. Le GITHUB_TOKEN fourni
+# automatiquement ne suffit pas : il n'a jamais accès aux projets d'une organisation.
+
+name: Synchroniser le projet GitHub
+
+on:
+  # Bouton « Run workflow » de l'onglet Actions : synchronisation complète.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Ré-appliquer les champs de project-items.json aux éléments déjà présents (remplace les changements faits à la main)"
+        type: boolean
+        default: false
+
+  # Tickets : ajout au projet, Done à la fermeture, In progress à la réouverture.
+  issues:
+    types: [opened, closed, reopened, labeled]
+
+  # Pull requests : In review à l'ouverture, Done à la fusion (avec les tickets « Closes #n »).
+  #
+  # Pourquoi pull_request_target et pas pull_request ?
+  #   Avec pull_request, une PR venant d'un fork ne reçoit pas les secrets : la
+  #   synchronisation échouerait faute de PROJECT_TOKEN.
+  # Pourquoi est-ce sûr ici ?
+  #   pull_request_target s'exécute avec les secrets du dépôt ; il devient dangereux
+  #   seulement si le workflow récupère et exécute le code proposé par la PR. Ce n'est
+  #   jamais le cas ici :
+  #     - le checkout récupère explicitement la branche par défaut (jamais la branche
+  #       ni un commit de la PR) et seulement le dossier .github ;
+  #     - seul le script de la branche par défaut tourne : aucune installation de
+  #       dépendances, aucun build, aucun fichier de la PR n'est lu ni exécuté ;
+  #     - les données de la PR (titre, description) ne sont jamais insérées dans une
+  #       commande avec ${{ }} : le script les lit comme du texte et n'en extrait que
+  #       des numéros de tickets ;
+  #     - le GITHUB_TOKEN est en lecture seule (voir permissions) et le checkout ne
+  #       conserve aucun identifiant (persist-credentials: false).
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, closed]
+
+  # Rattrapage automatique (facultatif) : décommentez pour une synchronisation
+  # complète chaque lundi à 6 h 17 UTC, une fois PROJECT_TOKEN configuré.
+  # schedule:
+  #   - cron: "17 6 * * 1"
+
+# Droits du GITHUB_TOKEN automatique, réduits au minimum : il ne sert qu'au checkout.
+# Les écritures dans le projet passent par PROJECT_TOKEN.
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  synchroniser:
+    name: Ranger les tickets dans le projet
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Seule l'étiquette « bug » déclenche une synchronisation : inutile de lancer
+    # une machine pour les autres étiquettes (le script vérifie le nom exact).
+    if: >-
+      github.event_name != 'issues'
+      || github.event.action != 'labeled'
+      || contains(github.event.label.name, 'bug')
+      || contains(github.event.label.name, 'bogue')
+    # Une seule exécution à la fois par ticket ou par PR (et une seule synchronisation
+    # complète à la fois) : deux événements rapprochés sur le même élément ne se
+    # marchent pas dessus. cancel-in-progress: false met en file d'attente au lieu
+    # d'annuler ; de toute façon le script relit l'état réel du ticket sur GitHub.
+    concurrency:
+      group: project-sync-${{ github.event.issue.number || github.event.pull_request.number || 'complet' }}
+      cancel-in-progress: false
+
+    steps:
+      # Le secret n'est jamais placé dans l'environnement de cette étape :
+      # elle reçoit seulement « true » ou « false ».
+      - name: Vérifier la présence du secret PROJECT_TOKEN
+        env:
+          PROJECT_TOKEN_DEFINI: ${{ secrets.PROJECT_TOKEN != '' }}
+        run: |
+          if [ "${PROJECT_TOKEN_DEFINI}" != "true" ]; then
+            message="Le secret PROJECT_TOKEN est absent ou vide. Créez un jeton avec le droit Projects (lecture et écriture) sur l'organisation, puis ajoutez-le dans Settings > Secrets and variables > Actions sous le nom PROJECT_TOKEN. Pas à pas : docs/PROJET-GITHUB.md"
+            echo "::error title=Secret PROJECT_TOKEN manquant::${message}"
+            {
+              echo "## Secret PROJECT_TOKEN manquant"
+              echo ""
+              echo "${message}"
+            } >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+          echo "Secret PROJECT_TOKEN présent."
+
+      # Branche par défaut uniquement, dossier .github uniquement, sans identifiants conservés.
+      # Actions épinglées par empreinte de commit (une étiquette peut être déplacée) ;
+      # la version correspondante est indiquée en commentaire.
+      - name: Récupérer le script de la branche par défaut
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: .github
+
+      - name: Synchroniser le projet « Portfolio »
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          SYNC_FORCE: ${{ inputs.force }}
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          retries: 3
+          script: |
+            const synchroniser = require('./.github/scripts/sync-project.js');
+            return await synchroniser({ github, context, core });

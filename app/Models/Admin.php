@@ -20,7 +20,9 @@ final class Admin
     /** @return array<string, mixed>|null */
     public static function findByUsername(string $username): ?array
     {
-        return Database::fetch('SELECT * FROM admins WHERE username = ?', [$username]);
+        // Comparaison BINAIRE : la collation par défaut confondrait « admin »,
+        // « ádmin » ou « ａｄｍｉｎ », ce qui contournerait la limitation par compte.
+        return Database::fetch('SELECT * FROM admins WHERE username = ? COLLATE utf8mb4_bin', [$username]);
     }
 
     public static function count(): int
@@ -110,9 +112,27 @@ final class Admin
         });
     }
 
-    public static function setTotpLastStep(int $id, int $step): void
+    /**
+     * Enregistre le dernier pas TOTP accepté, de façon ATOMIQUE : renvoie false
+     * si ce pas (ou un pas plus récent) a déjà été utilisé, y compris par une
+     * requête concurrente (anti-rejeu).
+     */
+    public static function setTotpLastStep(int $id, int $step): bool
     {
-        Database::execute('UPDATE admins SET totp_last_step = ? WHERE id = ?', [$step, $id]);
+        return Database::execute(
+            'UPDATE admins SET totp_last_step = ? WHERE id = ? AND (totp_last_step IS NULL OR totp_last_step < ?)',
+            [$step, $id, $step]
+        ) === 1;
+    }
+
+    /**
+     * Incrémente la « version de session » du compte : toutes les sessions
+     * ouvertes avant cet appel deviennent invalides. Renvoie la nouvelle version.
+     */
+    public static function bumpSessionVersion(int $id): int
+    {
+        Database::execute('UPDATE admins SET session_version = session_version + 1 WHERE id = ?', [$id]);
+        return (int) Database::value('SELECT session_version FROM admins WHERE id = ?', [$id]);
     }
 
     /**

@@ -1,0 +1,328 @@
+# =============================================================================
+#  Intégration continue du portfolio (GitHub Actions)
+# =============================================================================
+#  lint   : syntaxe PHP 8.1, 8.2 et 8.3 (versions proposées par Hostinger),
+#           règles impératives de docs/ARCHITECTURE.md (tirets, CSP stricte),
+#           scripts shell (shellcheck).
+#  tests  : tests CLI de tests/ et visite HTTP du site sur une vraie base
+#           (MySQL 8.0 et MariaDB 10.11, comme chez Hostinger).
+#  paquet : zip prêt pour Hostinger (scripts/build-release.sh), publié comme
+#           artefact pendant 30 jours ; uniquement sur la branche main et en
+#           lancement manuel (onglet Actions > CI > Run workflow).
+#  Mode d'emploi : docs/LIVRAISON.md.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Droits minimaux : le jeton de la CI ne peut que lire le code.
+permissions:
+  contents: read
+
+# Une nouvelle poussée sur une branche annule l'exécution précédente de cette
+# branche (sauf sur main, pour ne jamais interrompre la fabrication d'un paquet).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    shell: bash   # bash -eo pipefail : une commande en échec arrête l'étape
+
+env:
+  PHP_EXTENSIONS: pdo_mysql, gd, intl, mbstring, fileinfo, exif, openssl
+
+jobs:
+  # ---------------------------------------------------------------------------
+  lint:
+    name: lint · PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3']
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Installation de PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: none
+
+      - name: Syntaxe de tous les fichiers PHP (php -l)
+        run: |
+          echo "PHP $(php -r 'echo PHP_VERSION;')"
+          nb=0
+          erreurs=0
+          while IFS= read -r -d '' fichier; do
+            nb=$((nb + 1))
+            if ! sortie="$(php -l "$fichier" 2>&1)"; then
+              erreurs=$((erreurs + 1))
+              echo "$sortie"
+              echo "::error file=${fichier#./},title=php -l::Erreur de syntaxe avec PHP $(php -r 'echo PHP_VERSION;')"
+            fi
+          done < <(find . -type f -name '*.php' -not -path './.git/*' -print0 | sort -z)
+          echo "$nb fichiers vérifiés, $erreurs erreur(s)."
+          test "$erreurs" -eq 0
+
+      # Les règles suivantes ne dépendent pas de la version de PHP : une seule fois.
+      - name: Rédaction et CSP (tirets longs, style=, <script> en ligne)
+        if: ${{ !cancelled() && matrix.php == '8.3' }}
+        run: php scripts/check-conventions.php
+
+      - name: Scripts shell (bash -n et shellcheck)
+        if: ${{ !cancelled() && matrix.php == '8.3' }}
+        run: |
+          for script in scripts/*.sh; do
+            bash -n "$script"
+          done
+          shellcheck --version | head -n 2
+          shellcheck scripts/*.sh
+
+  # ---------------------------------------------------------------------------
+  tests:
+    name: tests · PHP ${{ matrix.php }} · ${{ matrix.db }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.1'
+            db: mysql:8.0
+            health: mysqladmin ping -h 127.0.0.1 --silent
+          - php: '8.3'
+            db: mysql:8.0
+            health: mysqladmin ping -h 127.0.0.1 --silent
+          - php: '8.3'
+            db: mariadb:10.11
+            health: healthcheck.sh --connect --innodb_initialized
+    # Base jetable, détruite avec la machine : ces identifiants ne protègent rien.
+    # models-test.php exige une base dont le nom commence par « portfolio_test_ ».
+    services:
+      db:
+        image: ${{ matrix.db }}
+        env:
+          MYSQL_RANDOM_ROOT_PASSWORD: 'yes'   # aucun accès root n'est nécessaire
+          MYSQL_DATABASE: portfolio_test_ci
+          MYSQL_USER: portfolio_ci            # droits sur portfolio_test_ci uniquement
+          MYSQL_PASSWORD: ci-pass
+        ports:
+          - 3306/tcp                          # port de la machine choisi au hasard
+        options: >-
+          --health-cmd="${{ matrix.health }}"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: portfolio_test_ci
+      DB_USER: portfolio_ci
+      DB_PASS: ci-pass
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Installation de PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: none
+
+      # Décodage réel des QR codes de la double authentification par
+      # tests/totp-test.php (zxing-cpp et OpenCV). Facultatif : sans eux, le test
+      # vérifie tout le reste et le signale par un avertissement.
+      - name: Décodeurs de QR codes (facultatifs)
+        continue-on-error: true
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input --quiet \
+            --target "$RUNNER_TEMP/qrtest" 'zxing-cpp==3.1.1' 'opencv-python-headless==5.0.0.93'
+
+      - name: Configuration de la CI (app/config.php jetable)
+        env:
+          DB_PORT: ${{ job.services.db.ports['3306'] }}
+        run: |
+          echo "DB_PORT=$DB_PORT" >> "$GITHUB_ENV"
+
+          # Identifiants du client mysql : fichier privé plutôt qu'en ligne de commande.
+          cnf="$RUNNER_TEMP/mysql-ci.cnf"
+          (umask 077 && printf '[client]\nhost=%s\nport=%s\nuser=%s\npassword=%s\n' \
+            "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASS" > "$cnf")
+          echo "MYSQL_CNF=$cnf" >> "$GITHUB_ENV"
+
+          # Même structure que le modèle, valeurs de test, clé secrète aléatoire.
+          APP_KEY="$(php -r 'echo bin2hex(random_bytes(32));')"
+          echo "::add-mask::$APP_KEY"
+          export APP_KEY
+          # shellcheck disable=SC2016  # code PHP entre apostrophes : pas d'expansion voulue
+          php -r '
+            $c = require "app/config.example.php";
+            $c["env"] = "development";
+            $c["base_url"] = "http://127.0.0.1:8080";
+            $c["db"] = array_replace($c["db"], [
+                "host" => getenv("DB_HOST"), "port" => (int) getenv("DB_PORT"),
+                "name" => getenv("DB_NAME"), "user" => getenv("DB_USER"), "pass" => getenv("DB_PASS"),
+            ]);
+            $c["mail"]["transport"] = "none";
+            $c["security"]["app_key"] = getenv("APP_KEY");
+            $c["security"]["setup_token"] = "";
+            $php = "<?php\n// Configuration jetable de la CI (jamais livrée).\n\ndeclare(strict_types=1);\n\nreturn "
+                . var_export($c, true) . ";\n";
+            file_put_contents("app/config.php", $php);
+          '
+          php -l app/config.php
+
+          # Le service est déclaré prêt par son healthcheck ; on vérifie la connexion.
+          for essai in $(seq 1 30); do
+            if mysql --defaults-extra-file="$cnf" "$DB_NAME" -e 'SELECT VERSION() AS serveur;'; then
+              break
+            fi
+            if [ "$essai" -eq 30 ]; then
+              echo "::error::Base de données injoignable."
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Import de database.sql
+        run: |
+          mysql --defaults-extra-file="$MYSQL_CNF" "$DB_NAME" < database.sql
+          mysql --defaults-extra-file="$MYSQL_CNF" "$DB_NAME" -e 'SHOW TABLES;'
+
+      # docs/MIGRATIONS.md : chaque migration doit être relançable, donc passer
+      # sans erreur (deux fois) sur une base déjà à jour.
+      - name: Migrations relançables (database/migrations)
+        run: |
+          shopt -s nullglob
+          for migration in database/migrations/*.sql; do
+            echo "::group::$migration"
+            mysql --defaults-extra-file="$MYSQL_CNF" --table "$DB_NAME" < "$migration"
+            mysql --defaults-extra-file="$MYSQL_CNF" "$DB_NAME" < "$migration" > /dev/null
+            echo "::endgroup::"
+          done
+
+      - name: Tests (tests/*-test.php)
+        env:
+          QR_DECODER_PATH: ${{ runner.temp }}/qrtest
+          PYTHON: python3
+        run: |
+          # core-test.php en premier, puis les autres ; base neuve pour chacun.
+          liste=(tests/core-test.php)
+          for test in tests/*-test.php; do
+            if [ "$test" != tests/core-test.php ]; then
+              liste+=("$test")
+            fi
+          done
+          echecs=0
+          for test in "${liste[@]}"; do
+            mysql --defaults-extra-file="$MYSQL_CNF" "$DB_NAME" < database.sql
+            echo "::group::php $test"
+            sortie="$RUNNER_TEMP/sortie-test.txt"
+            if ! php "$test" 2>&1 | tee "$sortie"; then
+              echecs=$((echecs + 1))
+              echo "::error file=$test,title=Test en échec::$(grep -m 1 -E 'ÉCHEC|échec|Fatal|Uncaught' "$sortie" || echo 'voir le journal')"
+            fi
+            if grep -q 'AVERTISSEMENT' "$sortie"; then
+              echo "::warning file=$test,title=Test partiel::$(grep -m 1 'AVERTISSEMENT' "$sortie")"
+            fi
+            echo "::endgroup::"
+          done
+          echo "${#liste[@]} fichier(s) de test, $echecs en échec."
+          test "$echecs" -eq 0
+
+      - name: Visite HTTP du site (scripts/smoke-test.sh)
+        run: |
+          mysql --defaults-extra-file="$MYSQL_CNF" "$DB_NAME" < database.sql
+          php -S 127.0.0.1:8080 -t public_html app/tools/dev-router.php > "$RUNNER_TEMP/serveur.log" 2>&1 &
+          serveur=$!
+          trap 'kill "$serveur" 2>/dev/null || true' EXIT
+          for _ in $(seq 1 30); do
+            if curl -fs -o /dev/null http://127.0.0.1:8080/robots.txt 2>/dev/null; then
+              break
+            fi
+            sleep 0.5
+          done
+          statut=0
+          bash scripts/smoke-test.sh http://127.0.0.1:8080 || statut=$?
+
+          # Aucune erreur, aucun avertissement PHP ne doit avoir été journalisé
+          # (tests CLI et visite HTTP compris).
+          journal=app/storage/logs/php-errors.log
+          if [ -s "$journal" ]; then
+            echo "::error title=Journal PHP::Erreurs journalisées dans $journal"
+            cat "$journal"
+            statut=1
+          fi
+          if [ "$statut" -ne 0 ]; then
+            echo "--- Journal du serveur PHP"
+            cat "$RUNNER_TEMP/serveur.log"
+          fi
+          exit "$statut"
+
+  # ---------------------------------------------------------------------------
+  paquet:
+    name: paquet · zip Hostinger
+    needs: [lint, tests]
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Installation de PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: none
+
+      - name: Fabrication et vérification du zip
+        id: zip
+        env:
+          TZ: Europe/Paris   # date du nom de fichier à l'heure française
+        run: |
+          bash scripts/build-release.sh --detail
+          chemin="$(ls dist/portfolio-hostinger-*.zip)"
+          nom="$(basename "$chemin" .zip)-${GITHUB_SHA::7}"
+          {
+            echo "chemin=$chemin"
+            echo "nom=$nom"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Paquet Hostinger"
+            echo
+            echo "| Fichier | Taille | SHA-256 |"
+            echo "|---|---|---|"
+            echo "| \`$(basename "$chemin")\` | $(du -h "$chemin" | cut -f1) | \`$(sha256sum "$chemin" | cut -d' ' -f1)\` |"
+            echo
+            echo "Téléchargement : section **Artifacts** en bas de cette page, artefact \`$nom\` (conservé 30 jours)."
+            echo "GitHub l'emballe dans un zip : décompressez-le une fois pour obtenir le paquet. Mode d'emploi : \`docs/LIVRAISON.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publication de l'artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.zip.outputs.nom }}
+          path: ${{ steps.zip.outputs.chemin }}
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0   # le paquet est déjà compressé

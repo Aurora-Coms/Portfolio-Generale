@@ -301,7 +301,15 @@ if ($reset) {
         fwrite(STDOUT, "Double authentification désactivée (codes de secours supprimés) : réactivez-la dans « Mon compte ».\n");
     }
 
-    // Un mot de passe réinitialisé = toutes les sessions ouvertes sont fermées.
+    // Un mot de passe réinitialisé = toutes les sessions ouvertes sont fermées :
+    // la version de session du compte change (efficace même si les sessions
+    // sont stockées ailleurs), et les fichiers de session locaux sont supprimés.
+    try {
+        Admin::bumpSessionVersion($id);
+    } catch (\Throwable) {
+        // Base pas encore migrée (colonne session_version absente) : la
+        // suppression des fichiers ci-dessous suffit.
+    }
     $closed = 0;
     foreach (glob(STORAGE_PATH . '/sessions/sess_*') ?: [] as $file) {
         if (preg_match('/^sess_[A-Za-z0-9,-]+$/', basename($file)) && @unlink($file)) {

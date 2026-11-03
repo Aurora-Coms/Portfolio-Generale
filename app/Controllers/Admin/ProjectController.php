@@ -443,9 +443,9 @@ final class ProjectController extends AdminController
         return PUBLIC_PATH . '/uploads/projects';
     }
 
-    /** Violation de contrainte d'unicité (SQLSTATE 23000) ? */
+    /** Violation d'un index UNIQUE (code 1062, identique sous MySQL et MariaDB) ? */
     private static function isDuplicate(PDOException $e): bool
     {
-        return (string) $e->getCode() === '23000';
+        return \App\Core\Database::isDuplicateKey($e);
     }
 }

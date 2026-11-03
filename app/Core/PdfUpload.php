@@ -39,6 +39,9 @@ final class PdfUpload
         if (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'pdf') {
             throw new UploadException('Le CV doit être un fichier .pdf.');
         }
+        if (!class_exists(\finfo::class)) {
+            throw new UploadException('L\'extension PHP « fileinfo » est requise : activez-la dans hPanel (Configuration PHP > Extensions).');
+        }
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
         $head = (string) file_get_contents($file['tmp_name'], false, null, 0, 5);
         if ($mime !== 'application/pdf' || $head !== '%PDF-') {

@@ -43,7 +43,8 @@ final class Database
             ]);
             // Même fuseau horaire que PHP (Europe/Paris) pour les dates par défaut,
             // et mode strict : MySQL refuse les données invalides au lieu de les tronquer.
-            self::$pdo->exec("SET SESSION sql_mode = 'STRICT_ALL_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION'");
+            // (ensemble valide sur MySQL 8 et MariaDB 10.4+, sans avertissement 3135)
+            self::$pdo->exec("SET SESSION sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'");
             $tz = self::$pdo->prepare('SET time_zone = ?');
             $tz->execute([(new \DateTimeImmutable())->format('P')]);
         }
@@ -147,6 +148,16 @@ final class Database
             }
             throw $e;
         }
+    }
+
+    /**
+     * L'exception signale-t-elle une valeur déjà utilisée (index UNIQUE) ?
+     * Code 1062 (ER_DUP_ENTRY), identique sous MySQL et MariaDB. Le SQLSTATE
+     * 23000 seul ne suffit pas : MariaDB l'utilise aussi pour les CHECK.
+     */
+    public static function isDuplicateKey(\PDOException $e): bool
+    {
+        return (int) ($e->errorInfo[1] ?? 0) === 1062;
     }
 
     /**

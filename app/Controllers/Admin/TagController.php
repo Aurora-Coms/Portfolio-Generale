@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Core\AdminController;
+use App\Core\Database;
 use App\Core\Session;
 use App\Core\Slug;
 use App\Core\Validator;
@@ -45,7 +46,7 @@ final class TagController extends AdminController
         try {
             Tag::create($data);
         } catch (PDOException $e) {
-            if ((string) $e->getCode() !== '23000') {
+            if (!Database::isDuplicateKey($e)) {
                 throw $e;
             }
             $this->renderForm(null, $this->oldInput(), ['name' => 'Ce tag vient d\'être créé par ailleurs : rechargez la liste.'], 422);
@@ -78,7 +79,7 @@ final class TagController extends AdminController
         try {
             Tag::update($tagId, $data);
         } catch (PDOException $e) {
-            if ((string) $e->getCode() !== '23000') {
+            if (!Database::isDuplicateKey($e)) {
                 throw $e;
             }
             $this->renderForm($tag, $this->oldInput(), ['name' => 'Ce nom ou cette adresse vient d\'être utilisé : choisissez-en un autre.'], 422);

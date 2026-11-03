@@ -129,3 +129,12 @@ seule fois, juste après la migration : il peut être relancé sans risque à ce
 moment-là. Plus tard, il remettrait le niveau confirmé sur une compétence
 volontairement remise à son ancien niveau, et ajouterait de nouveau une
 compétence de la liste supprimée entre-temps.
+
+### `2026-11-04-securite-sessions.sql` : fermeture des autres sessions
+
+À exécuter **une seule fois** sur un site installé avant le 4 novembre 2026
+(inutile après une installation neuve). Ajoute la colonne `session_version` à la
+table `admins` : changer le mot de passe, activer ou désactiver la double
+authentification ferme alors les sessions ouvertes sur les autres appareils.
+Aucune donnée n'est supprimée. Tant que la migration n'est pas faite, le site
+fonctionne normalement, sans cette protection supplémentaire.

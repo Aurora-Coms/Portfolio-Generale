@@ -32,15 +32,43 @@ final class ErrorHandler
         }
 
         // Les « warnings » et « notices » deviennent des exceptions : aucun
-        // comportement silencieusement incorrect.
-        set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+        // comportement silencieusement incorrect. Les DÉPRÉCIATIONS, elles,
+        // sont seulement journalisées en production : passer à une version de
+        // PHP plus récente dans hPanel ne doit pas casser le site.
+        set_error_handler(static function (int $severity, string $message, string $file, int $line) use ($dev): bool {
             if (!(error_reporting() & $severity)) {
                 return false; // erreur masquée volontairement avec @
+            }
+            if (!$dev && ($severity & (E_DEPRECATED | E_USER_DEPRECATED)) !== 0) {
+                error_log(sprintf('[deprecated] %s in %s:%d', $message, $file, $line));
+                return true;
             }
             throw new ErrorException($message, 0, $severity, $file, $line);
         });
 
         set_exception_handler([self::class, 'handle']);
+
+        // Erreurs fatales (mémoire épuisée, temps dépassé…) : pas d'exception,
+        // mais on affiche quand même une page d'erreur au lieu d'une page vide.
+        register_shutdown_function(static function () use ($dev): void {
+            $err = error_get_last();
+            if ($err === null || !($err['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR))) {
+                return;
+            }
+            error_log(sprintf('[fatal] %s in %s:%d', $err['message'], $err['file'], $err['line']));
+            if ($dev) {
+                return; // display_errors affiche déjà le détail
+            }
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            if (!headers_sent()) {
+                http_response_code(500);
+                header('Content-Type: text/html; charset=utf-8');
+                header('Cache-Control: no-store');
+            }
+            echo self::minimalPage(500);
+        });
     }
 
     /**
@@ -74,7 +102,8 @@ final class ErrorHandler
         $message = $e instanceof HttpException ? $e->getMessage() : '';
 
         try {
-            $isAdmin = str_starts_with(Request::path(), '/admin');
+            $path    = Request::path();
+            $isAdmin = str_starts_with($path, '/admin') || $path === '/setup-admin.php';
             echo View::renderToString('site/errors/error', [
                 'status'  => $status,
                 'message' => $message,
@@ -86,10 +115,23 @@ final class ErrorHandler
         } catch (Throwable $renderError) {
             // Dernier recours (ex. base de données indisponible) : page minimale.
             error_log('[error-page] ' . $renderError->getMessage());
-            echo '<!doctype html><html lang="fr"><meta charset="utf-8"><title>'
-                . e(self::title($status)) . '</title><body style="background:#13141B;color:#D5D8E4;font-family:sans-serif;padding:2rem">'
-                . '<h1>' . e(self::title($status)) . '</h1><p><a style="color:#C3A6FF" href="/">Retour à l\'accueil</a></p></body></html>';
+            echo self::minimalPage($status);
         }
+    }
+
+    /**
+     * Page de dernier recours, sans base de données ni gabarit. Aucun style
+     * en ligne (interdit par la CSP) : elle utilise la feuille du site.
+     */
+    private static function minimalPage(int $status): string
+    {
+        $title = e(self::title($status));
+        return '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
+            . '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            . '<meta name="robots" content="noindex"><title>' . $title . '</title>'
+            . '<link rel="stylesheet" href="/assets/css/site.css"></head>'
+            . '<body><main class="container section"><h1>' . $title . '</h1>'
+            . '<p><a href="/">Retour à l\'accueil</a></p></main></body></html>';
     }
 
     public static function title(int $status): string

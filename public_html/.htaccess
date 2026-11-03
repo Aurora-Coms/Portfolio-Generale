@@ -5,6 +5,12 @@
 # Pas de listing des dossiers, pas de négociation de contenu.
 Options -Indexes -MultiViews
 DirectoryIndex index.php
+
+# Pas de redirection automatique « /dossier » -> « /dossier/ » (le routeur
+# s'en occupe ; sinon boucle de redirection sur /assets, /uploads…).
+<IfModule mod_dir.c>
+    DirectorySlash Off
+</IfModule>
 AddDefaultCharset UTF-8
 ServerSignature Off
 
@@ -25,6 +31,14 @@ ServerSignature Off
 
     # 3. Fichiers cachés (.git, .env, .htaccess…) interdits, sauf .well-known (SSL).
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    # 3 bis. Défense en profondeur (ne dépend que de mod_rewrite) : un dossier
+    #        app/ ou storage/ posé ici par erreur, et tout fichier de uploads/
+    #        qui n'est pas une image au nom généré par le serveur, sont refusés.
+    RewriteRule ^(app|storage)(/|$) - [F,L,NC]
+    RewriteCond %{REQUEST_URI} ^/uploads/
+    RewriteCond %{REQUEST_URI} !^/uploads/projects/[a-f0-9]{32}(-thumb)?\.(webp|jpg)$
+    RewriteRule ^ - [F,L]
 
     # 4. Fichiers sensibles interdits même s'ils étaient envoyés par erreur.
     RewriteRule \.(sql|bak|old|orig|save|swp|log|ini|sh|md|lock|dist|env|example|tar|gz|zip)$ - [F,L,NC]
@@ -67,13 +81,16 @@ ServerSignature Off
 #  Performances : compression et cache des fichiers statiques
 # -----------------------------------------------------------------------------
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/xml text/plain
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml application/xml text/xml text/plain
+    </IfModule>
 </IfModule>
 
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType text/css                 "access plus 1 year"
     ExpiresByType application/javascript   "access plus 1 year"
+    ExpiresByType text/javascript          "access plus 1 year"
     ExpiresByType font/woff2               "access plus 1 year"
     ExpiresByType image/webp               "access plus 1 month"
     ExpiresByType image/jpeg               "access plus 1 month"

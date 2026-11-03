@@ -46,6 +46,16 @@ final class Request
         return is_string($value) ? $value : $default;
     }
 
+    /**
+     * Champ envoyé par formulaire POST uniquement (jamais lu dans l'URL) :
+     * à utiliser pour les secrets (mots de passe, codes).
+     */
+    public static function post(string $key, string $default = ''): string
+    {
+        $value = $_POST[$key] ?? null;
+        return is_string($value) ? $value : $default;
+    }
+
     /** Paramètre de query string uniquement. */
     public static function query(string $key, string $default = ''): string
     {

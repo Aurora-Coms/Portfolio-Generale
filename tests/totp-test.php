@@ -210,7 +210,6 @@ function qr_png(array $matrix, string $file): void
         }
     }
     imagepng($img, $file);
-    imagedestroy($img);
 }
 
 $tmp = sys_get_temp_dir() . '/qr-test-' . bin2hex(random_bytes(4));

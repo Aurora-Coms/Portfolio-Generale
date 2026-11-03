@@ -72,7 +72,10 @@ function partial(string $name, array $data = []): string
  */
 function redirect(string $path, int $status = 303): never
 {
-    if (!str_starts_with($path, '/') || str_starts_with($path, '//') || str_contains($path, '\\') || preg_match('/[\r\n]/', $path)) {
+    // Refus de « //domaine », « /\domaine » et de TOUT caractère de contrôle :
+    // les navigateurs retirent tabulations et retours à la ligne, ce qui
+    // transformerait « /<TAB>/domaine » en « //domaine » (redirection ouverte).
+    if (!str_starts_with($path, '/') || str_starts_with($path, '//') || str_contains($path, '\\') || preg_match('/[\x00-\x1F\x7F]/', $path)) {
         $path = '/';
     }
     header('Location: ' . $path, true, $status);

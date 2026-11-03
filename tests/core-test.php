@@ -47,6 +47,10 @@ check('Markdown : attribut cassé impossible', !str_contains(Markdown::render('[
 check('Markdown : protocol-relative refusé', !str_contains(Markdown::render('[x](//evil.com)'), 'href'));
 check('Markdown : italique', Markdown::render('un *mot* ici') === '<p>un <em>mot</em> ici</p>');
 
+check('Markdown : lien « /\\domaine » non lié', !str_contains(Markdown::render('[x](/\\evil.com)'), 'href'));
+check('Markdown : lien interne sans rel', Markdown::render('[ok](/contact)') === '<p><a href="/contact">ok</a></p>');
+check('Markdown : lien avec tabulation refusé', !str_contains(Markdown::render("[x](/\t/evil.com)"), 'href'));
+
 // --- Slug --------------------------------------------------------------------
 check('Slug accents', Slug::make('Portail de la TVA') === 'portail-de-la-tva');
 check('Slug spéciaux', Slug::make('  Sci-fi & temporel !! ') === 'sci-fi-temporel');

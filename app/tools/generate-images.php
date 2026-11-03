@@ -126,8 +126,6 @@ function render(string $file, int $width, int $height, callable $draw, int $scal
     $final = imagecreatetruecolor($width, $height);
     imagecopyresampled($final, $big, 0, 0, 0, 0, $width, $height, $width * $scale, $height * $scale);
     imagepng($final, $file, 9);
-    imagedestroy($big);
-    imagedestroy($final);
     echo 'Écrit : ' . $file . ' (' . $width . 'x' . $height . ")\n";
 }
 

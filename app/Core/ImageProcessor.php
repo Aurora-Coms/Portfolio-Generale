@@ -64,6 +64,11 @@ final class ImageProcessor
             throw new UploadException('L\'image ne doit pas dépasser 8 Mo.');
         }
 
+        // Extensions indispensables : message clair plutôt qu'une erreur 500.
+        if (!class_exists(\finfo::class) || !extension_loaded('gd')) {
+            throw new UploadException('Les extensions PHP « fileinfo » et « gd » sont requises : activez-les dans hPanel (Configuration PHP > Extensions).');
+        }
+
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
         if (!is_string($mime) || !isset(self::ALLOWED[$mime])) {
             throw new UploadException('Format non autorisé : envoyez une image JPEG, PNG ou WebP.');
@@ -83,11 +88,15 @@ final class ImageProcessor
         }
 
         @ini_set('memory_limit', '512M');
-        $source = match ($mime) {
-            'image/jpeg' => @imagecreatefromjpeg($path),
-            'image/png'  => @imagecreatefrompng($path),
-            'image/webp' => @imagecreatefromwebp($path),
-        };
+        $reader = [
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png'  => 'imagecreatefrompng',
+            'image/webp' => 'imagecreatefromwebp',
+        ][$mime];
+        if (!function_exists($reader)) {
+            throw new UploadException('Ce serveur ne sait pas lire ce format d\'image : envoyez un JPEG ou un PNG.');
+        }
+        $source = @$reader($path);
         if (!$source instanceof GdImage) {
             throw new UploadException('Impossible de lire cette image.');
         }
@@ -97,7 +106,6 @@ final class ImageProcessor
         }
 
         if (!is_dir($destDir) || !is_writable($destDir)) {
-            imagedestroy($source);
             throw new UploadException('Le dossier des images n\'est pas accessible en écriture.');
         }
 
@@ -107,23 +115,24 @@ final class ImageProcessor
         $large   = $base . '.' . $ext;
         $thumb   = $base . '-thumb.' . $ext;
 
+        // Les images GD sont libérées automatiquement (PHP 8) : pas d'imagedestroy(),
+        // déprécié depuis PHP 8.5.
         try {
             $largeImg = self::resizeWithin($source, self::LARGE_MAX);
             $thumbImg = self::coverCrop($source, self::THUMB_W, self::THUMB_H);
             self::save($largeImg, $destDir . '/' . $large, $useWebp);
             self::save($thumbImg, $destDir . '/' . $thumb, $useWebp);
-            $result = [
-                'filename'       => $large,
-                'thumb_filename' => $thumb,
-                'width'          => imagesx($largeImg),
-                'height'         => imagesy($largeImg),
-            ];
-            imagedestroy($largeImg);
-            imagedestroy($thumbImg);
-        } finally {
-            imagedestroy($source);
+        } catch (\Throwable $e) {
+            // Pas de fichier orphelin si la seconde écriture échoue.
+            self::deleteFiles($destDir, $large, $thumb);
+            throw $e;
         }
-        return $result;
+        return [
+            'filename'       => $large,
+            'thumb_filename' => $thumb,
+            'width'          => imagesx($largeImg),
+            'height'         => imagesy($largeImg),
+        ];
     }
 
     /** Supprime les fichiers d'une image (noms vérifiés : aucune traversée de dossier). */
@@ -182,7 +191,6 @@ final class ImageProcessor
             imagealphablending($flat, true);
             imagecopy($flat, $img, 0, 0, 0, 0, imagesx($img), imagesy($img));
             $ok = imagejpeg($flat, $path, 85);
-            imagedestroy($flat);
         }
         if (!$ok) {
             throw new UploadException('Impossible d\'enregistrer l\'image.');
@@ -204,10 +212,6 @@ final class ImageProcessor
             8       => imagerotate($img, 90, 0),
             default => null,
         };
-        if ($rotated instanceof GdImage) {
-            imagedestroy($img);
-            return $rotated;
-        }
-        return $img;
+        return $rotated instanceof GdImage ? $rotated : $img;
     }
 }

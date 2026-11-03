@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Core\AdminController;
+use App\Core\Database;
 use App\Core\Session;
 use App\Core\Slug;
 use App\Core\Validator;
@@ -56,7 +57,7 @@ final class CategoryController extends AdminController
         try {
             Category::create($data);
         } catch (PDOException $e) {
-            if ((string) $e->getCode() !== '23000') {
+            if (!Database::isDuplicateKey($e)) {
                 throw $e;
             }
             $this->renderForm(null, $this->oldInput(), ['slug' => 'Cette adresse vient d\'être utilisée : choisissez-en une autre.'], 422);
@@ -90,7 +91,7 @@ final class CategoryController extends AdminController
         try {
             Category::update($catId, $data);
         } catch (PDOException $e) {
-            if ((string) $e->getCode() !== '23000') {
+            if (!Database::isDuplicateKey($e)) {
                 throw $e;
             }
             $this->renderForm($category, $this->oldInput(), ['slug' => 'Cette adresse vient d\'être utilisée : choisissez-en une autre.'], 422);

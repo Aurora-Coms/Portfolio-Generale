@@ -153,6 +153,9 @@ l'administrateur.
   `use_only_cookies`, pas d'identifiant dans l'URL.
 - **Nouvel identifiant de session** à chaque changement de privilège : connexion,
   étape 2FA, changement de mot de passe, activation de la 2FA.
+- **Version de session** : changer le mot de passe, activer ou désactiver la 2FA
+  incrémente un compteur dans la table `admins` ; toutes les **autres** sessions du
+  compte (autres appareils) sont alors fermées à leur prochaine requête.
 - **Expiration** : 30 minutes d'inactivité et 8 heures au maximum
   (`security.session_idle_timeout`, `session_absolute_timeout`) ; la session est
   aussi liée à l'empreinte (SHA-256) du navigateur.
@@ -179,8 +182,12 @@ devine quels identifiants existent.
   (`password`, `azerty`, `admin`…) dans un mot de passe de moins de 16 caractères.
   Les phrases de passe sont encouragées.
 - **Anti-énumération** : même message d'erreur que l'identifiant existe ou non,
-  et **hachage factice** calculé quand le compte n'existe pas, pour que le temps de
-  réponse soit identique.
+  et vérification contre un **hachage factice précalculé** (mêmes paramètres
+  Argon2id) quand le compte n'existe pas : une seule vérification dans les deux cas,
+  donc un temps de réponse identique (mesuré dans `tests/auth-security-test.php`).
+- **Identifiant strict** : seuls `A-Z a-z 0-9 . _ -` (3 à 50 caractères) sont
+  acceptés, et la recherche du compte est **binaire** : « ádmin », « ａｄｍｉｎ » ou un
+  caractère invisible ne désignent pas le compte « admin ».
 - **Ré-authentification** : changer le mot de passe ou gérer la 2FA redemande le
   mot de passe actuel (avec limitation : 5 échecs en 15 minutes).
 - Le mot de passe n'est jamais réaffiché dans un formulaire ni journalisé.
@@ -195,12 +202,15 @@ devine quels identifiants existent.
 **Le risque** : essayer des milliers de mots de passe ou de codes, ou inonder le
 formulaire de contact.
 
-**Ce qui est fait** : chaque tentative est enregistrée dans la table `throttle`.
+**Ce qui est fait** : chaque tentative est enregistrée dans la table `throttle`
+**avant** la vérification, puis les tentatives sont comptées : des requêtes envoyées
+en parallèle ne peuvent pas passer sous la limite (testé avec 30 connexions
+simultanées dans `tests/auth-security-test.php`).
 
 | Action | Limite |
 |---|---|
 | Connexion, par IP | 5 échecs / 15 minutes |
-| Connexion, par identifiant | 10 échecs / heure |
+| Connexion, par compte (sauf appareil reconnu, voir ci-dessous) | 10 échecs / heure |
 | Code de double authentification, par compte | 5 échecs / 15 minutes |
 | Ré-authentification (page « Mon compte ») | 5 échecs / 15 minutes |
 | Jeton de `setup-admin.php`, par IP | 5 échecs / 15 minutes |
@@ -210,6 +220,13 @@ formulaire de contact.
   `app_key`) de la clé surveillée, jamais l'adresse IP en clair (RGPD). Les entrées
   de plus de 2 jours sont supprimées régulièrement (nettoyage automatique).
 - L'IP utilisée est `REMOTE_ADDR` : l'en-tête `X-Forwarded-For`, falsifiable, est ignoré.
+  En IPv6, tout le préfixe `/64` compte comme une seule adresse.
+- **Pas de blocage du vrai administrateur** : un attaquant pourrait épuiser la limite
+  par compte depuis plusieurs IP. Après chaque connexion réussie, le navigateur reçoit
+  un **cookie d'appareil signé** (HMAC avec `app_key`, `HttpOnly`, `Secure`,
+  `SameSite=Strict`, limité à `/admin`, 90 jours), méthode recommandée par l'OWASP :
+  un appareil reconnu n'est pas soumis à la limite par compte (la limite par IP
+  s'applique toujours).
 
 **Où** : `app/Core/Throttle.php`, `app/Core/Auth.php`, `app/Core/Request.php`.
 
@@ -225,8 +242,9 @@ formulaire de contact.
   compatible avec les applications courantes ; implémentation testée sur les
   vecteurs officiels des RFC 4226 et 6238 (`tests/totp-test.php`).
 - Tolérance de ±1 pas (décalage d'horloge), comparaison en temps constant.
-- **Anti-rejeu** : le dernier pas accepté est enregistré ; un code déjà utilisé
-  (ou plus ancien) est refusé.
+- **Anti-rejeu atomique** : le dernier pas accepté est enregistré par une requête
+  conditionnelle (`… WHERE totp_last_step < ?`) ; un code déjà utilisé (ou plus
+  ancien) est refusé, même s'il est envoyé plusieurs fois en même temps.
 - **Secret chiffré** en base avec **AES-256-GCM** (chiffrement authentifié) ; la clé
   est dérivée de `app_key` par **HKDF** (une clé différente par usage). Une fuite de
   la base seule ne révèle pas le secret.
@@ -312,7 +330,10 @@ dossiers (`Options -Indexes`). Les pages d'administration ajoutent
   d'erreur générique ; le détail est **journalisé** dans
   `app/storage/logs/php-errors.log` (hors du web).
 - Les avertissements PHP sont transformés en exceptions : pas de comportement
-  silencieusement incorrect.
+  silencieusement incorrect. Les simples **dépréciations** sont seulement journalisées
+  en production, pour qu'un changement de version de PHP dans hPanel ne casse pas le site.
+- **Erreurs fatales** (mémoire épuisée, temps dépassé) : une page d'erreur minimale
+  est quand même affichée (fonction d'arrêt), sans aucun style en ligne (CSP).
 - Seuls les messages des `HttpException`, écrits pour l'utilisateur, sont affichés ;
   jamais le message d'une exception technique.
 - Configuration absente ou invalide : réponse 503 « Site en maintenance », sans
@@ -401,8 +422,12 @@ Sans CAPTCHA (qui pisterait les visiteurs), le formulaire combine :
 ## 17. Redirections et adresses
 
 - `redirect()` n'accepte que des **chemins internes** commençant par `/` : `//site.fr`,
-  `\`, les retours à la ligne ou une URL complète sont remplacés par `/`. Aucune
-  « redirection ouverte » vers un site de hameçonnage n'est possible.
+  `\`, tout caractère de contrôle (tabulation, retour à la ligne : les navigateurs
+  les suppriment, ce qui transformerait « /⇥/site.fr » en « //site.fr ») ou une URL
+  complète sont remplacés par `/`. Aucune « redirection ouverte » vers un site de
+  hameçonnage n'est possible. Les liens Markdown « internes » suivent la même règle.
+- Un vrai dossier public (`/assets/`, `/uploads/`) répond 404, sans listing et sans
+  boucle de redirection.
 - La normalisation des adresses (`/parcours/` vers `/parcours`) passe par cette même
   fonction.
 
@@ -431,17 +456,12 @@ Sans CAPTCHA (qui pisterait les visiteurs), le formulaire combine :
 
 Aucune application n'est parfaite. Voici ce qui pourrait être renforcé :
 
-- **Sessions et changement de mot de passe** : changer son mot de passe depuis
-  l'administration renouvelle la session courante, mais une session ouverte sur un
-  autre appareil reste valide jusqu'à son expiration (30 min d'inactivité, 8 h au
-  maximum). Seul `create-admin.php --reset` ferme toutes les sessions. Amélioration :
-  enregistrer une « version de session » dans la table `admins`.
 - **Double authentification facultative** : elle est fortement recommandée (le
   tableau de bord alerte tant qu'elle est inactive) mais pas imposée.
 - **Limitation par IP** : plusieurs personnes derrière la même IP (réseau d'un lycée)
   partagent le même compteur ; à l'inverse, un attaquant disposant de nombreuses
-  adresses IPv6 peut contourner la limite par IP (la limite par identifiant reste
-  active). Si un CDN ou un proxy est placé devant le site, `REMOTE_ADDR` devient celle
+  préfixes IPv6 peut contourner la limite par IP (la limite par compte reste active
+  pour les appareils non reconnus). Si un CDN ou un proxy est placé devant le site, `REMOTE_ADDR` devient celle
   du proxy : il faudrait alors lire l'IP réelle dans un en-tête de confiance.
 - **Mot de passe compromis** : pas de vérification contre les bases de mots de passe
   ayant fuité (par exemple l'API « Have I Been Pwned » par k-anonymat).

@@ -27,7 +27,6 @@ namespace App\Controllers\Admin;
 use App\Core\AdminController;
 use App\Core\Auth;
 use App\Core\Crypto;
-use App\Core\Csrf;
 use App\Core\QrCode;
 use App\Core\Session;
 use App\Core\Throttle;
@@ -80,9 +79,9 @@ final class AccountController extends AdminController
 
         Throttle::clear(self::REAUTH_ACTION, (string) $admin['id']);
         Admin::updatePassword((int) $admin['id'], $new);
-        // Changement de privilège : nouvel identifiant de session et nouveau jeton CSRF.
-        Session::regenerate();
-        Csrf::rotate();
+        // Changement de privilège : les AUTRES sessions du compte sont fermées,
+        // celle-ci reçoit un nouvel identifiant et un nouveau jeton CSRF.
+        Auth::revokeOtherSessions();
         error_log('[auth] Mot de passe administrateur modifié.');
         $this->success('/admin/compte', 'Mot de passe modifié. Utilisez-le dès votre prochaine connexion.');
     }
@@ -133,7 +132,8 @@ final class AccountController extends AdminController
         Admin::enableTotp($id, Crypto::encrypt($secret, 'totp'), $step);
         Session::forget(self::SETUP_KEY);
         $codes = Admin::regenerateRecoveryCodes($id);
-        Session::regenerate();
+        // Les sessions ouvertes sans double authentification sont fermées.
+        Auth::revokeOtherSessions();
         error_log('[auth] Double authentification activée.');
 
         $this->renderCodes($codes, true);
@@ -169,7 +169,7 @@ final class AccountController extends AdminController
         $id = (int) $admin['id'];
         Throttle::clear(self::REAUTH_ACTION, (string) $id);
         Admin::disableTotp($id);
-        Session::regenerate();
+        Auth::revokeOtherSessions();
         error_log('[auth] Double authentification désactivée.');
         $this->success('/admin/compte', 'Double authentification désactivée. Vos codes de secours ont été supprimés.');
     }

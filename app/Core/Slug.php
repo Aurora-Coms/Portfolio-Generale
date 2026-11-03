@@ -16,6 +16,15 @@ final class Slug
             $t = \Transliterator::create('Any-Latin; Latin-ASCII; Lower()');
             $text = $t !== null ? (string) $t->transliterate($text) : $text;
         } else {
+            // Sans intl : table de correspondance d'abord (iconv dépend de la
+            // locale du serveur et peut produire « r-seau » pour « Réseau »).
+            $text = strtr(mb_strtolower($text, 'UTF-8'), [
+                'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'ç' => 'c',
+                'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+                'ñ' => 'n', 'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o',
+                'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u', 'ý' => 'y', 'ÿ' => 'y',
+                'œ' => 'oe', 'æ' => 'ae', 'ß' => 'ss',
+            ]);
             $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
             $text = strtolower($converted !== false ? $converted : $text);
         }

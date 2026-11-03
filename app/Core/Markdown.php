@@ -118,11 +118,18 @@ final class Markdown
 
         // Liens [texte](url) : schémas autorisés uniquement.
         $text = preg_replace_callback('/\[([^\]]+)\]\(([^)\s]+)\)/', static function (array $m): string {
-            $url = $m[2]; // déjà échappé (& => &amp;, " => &quot;)
-            if (!preg_match('#^(https?://|mailto:|/(?!/))#i', html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))) {
+            $url     = $m[2]; // déjà échappé (& => &amp;, " => &quot;)
+            $decoded = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if (preg_match('/[\x00-\x1F\x7F]/', $decoded)) {
                 return $m[0];
             }
-            $external = preg_match('#^https?://#i', $url) === 1;
+            // Chemin interne strict : « / » suivi d'autre chose que « / » ou « \ »
+            // (« /\domaine » est traité comme « //domaine » par les navigateurs).
+            $internal = preg_match('#^/(?![/\\\\])#', $decoded) === 1;
+            if (!$internal && !preg_match('#^(https?://|mailto:)#i', $decoded)) {
+                return $m[0];
+            }
+            $external = !$internal;
             return '<a href="' . $url . '"' . ($external ? ' rel="noopener noreferrer"' : '') . '>' . $m[1] . '</a>';
         }, $text) ?? $text;
 
