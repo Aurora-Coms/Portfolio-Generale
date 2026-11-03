@@ -2547,3 +2547,29 @@ a.table__link:hover {
     color: var(--c-text-muted);
 }
 /* === Fin des ajouts thèmes de compétences === */
+
+/* === Ajouts accessibilité (revue clavier, couleurs forcées) === */
+/* Documentation : docs/STYLEGUIDE.md (§ « Accessibilité : barres collantes et
+   couleurs forcées »). */
+
+/* Barre du haut collante sur téléphone (61 px) : le focus clavier et la cible
+   #admin-nav du lien « Menu » sans JS (:target) ne passent plus dessous. */
+@media (max-width: 899px) {
+    html {
+        scroll-padding-top: 72px;
+    }
+}
+
+/* Barre d'actions collée en bas des longs formulaires (.form__actions--sticky) :
+   même chose en avançant au clavier, le champ focalisé reste au-dessus.
+   69 px sur une ligne ; sur téléphone, les boutons peuvent passer sur deux
+   lignes (123 px pour « Enregistrer les réglages » + « Annuler »). */
+html:has(.form__actions--sticky) {
+    scroll-padding-bottom: 88px;
+}
+
+@media (max-width: 639px) {
+    html:has(.form__actions--sticky) {
+        scroll-padding-bottom: 140px;
+    }
+}

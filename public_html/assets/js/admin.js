@@ -30,23 +30,35 @@
         }
         toggle.hidden = false;
 
+        // Position de défilement avant l'ouverture, rétablie à la fermeture
+        // (on ne perd pas sa place dans une longue liste).
+        var savedY = 0;
+
         function setOpen(open, returnFocus) {
+            var wasOpen = toggle.getAttribute('aria-expanded') === 'true';
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
             panel.classList.toggle('is-open', open);
-            if (!open && returnFocus) {
-                toggle.focus();
+            if (open && !wasOpen) {
+                // Le panneau s'affiche dans le flux, juste sous la barre du haut :
+                // depuis une page défilée, il serait hors de l'écran. On remonte
+                // donc en haut de page, puis le focus va sur le premier lien du menu
+                // (le logo du panneau, premier lien du DOM, est masqué sur téléphone).
+                savedY = window.pageYOffset || document.documentElement.scrollTop || 0;
+                window.scrollTo(0, 0);
+                var first = panel.querySelector('.admin-nav__link');
+                if (first) {
+                    first.focus({ preventScroll: true });
+                }
+            } else if (!open && wasOpen) {
+                window.scrollTo(0, savedY);
+                if (returnFocus) {
+                    toggle.focus({ preventScroll: true });
+                }
             }
         }
 
         toggle.addEventListener('click', function () {
-            var open = toggle.getAttribute('aria-expanded') !== 'true';
-            setOpen(open, false);
-            if (open) {
-                var first = panel.querySelector('a, button');
-                if (first) {
-                    first.focus();
-                }
-            }
+            setOpen(toggle.getAttribute('aria-expanded') !== 'true', false);
         });
 
         document.addEventListener('keydown', function (ev) {
