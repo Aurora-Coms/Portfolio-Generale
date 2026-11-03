@@ -97,6 +97,7 @@ if ((int) ($project['is_published'] ?? 0) === 1) {
     ]) ?>
 <?php else: ?>
     <p class="form__note">La première image est la couverture (cartes du site et aperçu de partage). Utilisez les flèches pour changer l'ordre.</p>
+    <div>
     <ul class="thumb-grid">
 <?php foreach ($images as $i => $img):
     $imgId = (int) $img['id'];
@@ -116,6 +117,7 @@ if ((int) ($project['is_published'] ?? 0) === 1) {
         ]) ?>
 <?php endforeach; ?>
     </ul>
+    </div>
 <?php endif; ?>
 </section>
 </div>

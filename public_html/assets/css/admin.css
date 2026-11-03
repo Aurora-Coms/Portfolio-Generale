@@ -2035,11 +2035,25 @@ a.table__link:hover {
     text-decoration-color: currentColor;
 }
 
+/* Sous-titre de ligne (slug, adresse) d'un tableau compact : coupé n'importe où
+   plutôt que d'élargir le tableau sur téléphone. */
+.table--compact .table__sub {
+    overflow-wrap: anywhere;
+}
+
 /* Rangée de boutons alignés d'une ligne de tableau à l'autre : les boutons texte
    (« Publier » / « Masquer »…) ont une largeur minimale commune. */
 .btn-row--even > .btn:not(.btn--icon),
 .btn-row--even > .inline-form > .btn:not(.btn--icon) {
     min-width: 108px;
+}
+
+/* Colonne secondaire d'un tableau : masquée sur téléphone pour que les actions
+   restent visibles (l'information reste disponible dans le formulaire). */
+@media (max-width: 639px) {
+    .table .col-secondary {
+        display: none;
+    }
 }
 
 /* === Ajouts admin lot B === */

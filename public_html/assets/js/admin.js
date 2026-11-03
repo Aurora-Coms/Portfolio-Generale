@@ -278,7 +278,7 @@
 }());
 
 /* === Ajouts admin lot A === */
-/* Connexion, projets, images. Documentation : docs/STYLEGUIDE.md, § 10. */
+/* Connexion, projets, images. Documentation : docs/STYLEGUIDE.md, § 10 bis. */
 (function () {
     'use strict';
 

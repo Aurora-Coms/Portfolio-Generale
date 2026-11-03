@@ -33,12 +33,12 @@ $sections = isset($sections) && is_array($sections) ? $sections : [];
     <?= partial('site/empty-state', ['comment' => '-- 0 catégorie', 'title' => 'Aucune catégorie dans cette section']) ?>
 <?php else: ?>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Catégories : <?= e($sectionLabel) ?>">
-        <table class="table">
+        <table class="table table--compact">
             <thead>
                 <tr>
                     <th scope="col">Nom</th>
-                    <th scope="col">Description</th>
-                    <th scope="col" class="table__num">Ordre</th>
+                    <th scope="col" class="col-secondary">Description</th>
+                    <th scope="col" class="table__num col-secondary">Ordre</th>
                     <th scope="col" class="table__num">Projets</th>
                     <th scope="col" class="table__actions"><span class="sr-only">Actions</span></th>
                 </tr>
@@ -56,8 +56,8 @@ $sections = isset($sections) && is_array($sections) ? $sections : [];
                         <a class="table__title" href="/admin/categories/<?= $cid ?>/modifier"><?= e($name) ?></a>
                         <span class="table__sub mono">?categorie=<?= e((string) $c['slug']) ?></span>
                     </th>
-                    <td class="small text-soft"><?= (string) ($c['description'] ?? '') !== '' ? e(str_limit((string) $c['description'], 90)) : '<span class="text-muted">Aucune</span>' ?></td>
-                    <td class="table__num"><?= (int) $c['position'] ?></td>
+                    <td class="small text-soft col-secondary"><?= (string) ($c['description'] ?? '') !== '' ? e(str_limit((string) $c['description'], 90)) : '<span class="text-muted">Aucune</span>' ?></td>
+                    <td class="table__num col-secondary"><?= (int) $c['position'] ?></td>
                     <td class="table__num"><?= $count ?></td>
                     <td class="table__actions">
                         <div class="btn-row">

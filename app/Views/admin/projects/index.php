@@ -53,8 +53,8 @@ $newHref = '/admin/projets/nouveau' . ($section !== null ? '?section=' . $sectio
         <thead>
             <tr>
                 <th scope="col">Titre</th>
-                <th scope="col">Section</th>
-                <th scope="col">Catégories</th>
+                <th scope="col" class="col-secondary">Section</th>
+                <th scope="col" class="col-secondary">Catégories</th>
                 <th scope="col">Statut</th>
                 <th scope="col">Visibilité</th>
                 <th scope="col" class="table__num">Images</th>
@@ -78,8 +78,8 @@ $newHref = '/admin/projets/nouveau' . ($section !== null ? '?section=' . $sectio
                     <span class="table__sub mono">/projet/<?= e((string) $p['slug']) ?></span>
 <?php endif; ?>
                 </th>
-                <td class="nowrap"><?= e((string) $p['section'] === 'game' ? 'Jeux' : 'Technique') ?></td>
-                <td class="small text-soft"><?= $catNames !== [] ? e(implode(', ', $catNames)) : '<span class="text-muted">Aucune</span>' ?></td>
+                <td class="nowrap col-secondary"><?= e((string) $p['section'] === 'game' ? 'Jeux' : 'Technique') ?></td>
+                <td class="small text-soft col-secondary"><?= $catNames !== [] ? e(implode(', ', $catNames)) : '<span class="text-muted">Aucune</span>' ?></td>
                 <td><span class="badge badge--<?= (string) $p['status'] === 'done' ? 'done' : 'progress' ?>"><?= e(status_label((string) $p['status'])) ?></span></td>
                 <td>
                     <div class="cluster">

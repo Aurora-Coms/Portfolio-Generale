@@ -32,7 +32,7 @@ $tags = isset($tags) && is_array($tags) ? $tags : [];
         <thead>
             <tr>
                 <th scope="col">Nom</th>
-                <th scope="col">Adresse (slug)</th>
+                <th scope="col" class="col-secondary">Adresse (slug)</th>
                 <th scope="col" class="table__num">Projets</th>
                 <th scope="col" class="table__actions"><span class="sr-only">Actions</span></th>
             </tr>
@@ -45,7 +45,7 @@ $tags = isset($tags) && is_array($tags) ? $tags : [];
 ?>
             <tr>
                 <th scope="row"><a class="table__title" href="/admin/tags/<?= $tid ?>/modifier"><?= e($name) ?></a></th>
-                <td><span class="mono small text-soft"><?= e((string) $t['slug']) ?></span></td>
+                <td class="col-secondary"><span class="mono small text-soft"><?= e((string) $t['slug']) ?></span></td>
                 <td class="table__num"><?= $count ?></td>
                 <td class="table__actions">
                     <div class="btn-row">

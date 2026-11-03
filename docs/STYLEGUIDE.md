@@ -1182,6 +1182,110 @@ Codes : 303 (succès, réel ou simulé pour un robot), 419 (CSRF), 422
 
 ---
 
+## Ajouts administration (lot A)
+
+Connexion et double authentification, tableau de bord, projets, images,
+catégories, tags. Styles : fin de `admin.css`, section
+`/* === Ajouts admin lot A === */` ; scripts : fin de `admin.js`, même titre.
+
+### Vues et contrôleurs (lot A)
+
+| Route | Contrôleur | Vue |
+|---|---|---|
+| `GET/POST /admin/connexion` | `AuthController::loginForm/login` | `admin/auth/login` (gabarit `admin-auth`) |
+| `GET/POST /admin/connexion/verification` | `AuthController::twoFactorForm/twoFactor` | `admin/auth/two-factor` |
+| `POST /admin/deconnexion` | `AuthController::logout` | (redirection) |
+| `GET /admin` | `DashboardController::index` | `admin/dashboard/index` |
+| `/admin/projets…` (ressource + `publier`, `vedette`) | `ProjectController` | `admin/projects/index`, `admin/projects/form` |
+| `/admin/projets/{id}/images`, `/admin/images/{id}…` | `ImageController` | `admin/images/index` |
+| `/admin/categories…` | `CategoryController` | `admin/categories/index`, `admin/categories/form` |
+| `/admin/tags…` | `TagController` | `admin/tags/index`, `admin/tags/form` |
+
+Contrats utiles :
+
+- **Connexion** : champs `username`, `password` ; réponses 303 (`/admin` ou
+  `/admin/connexion/verification`), 401 (« Identifiant ou mot de passe
+  incorrect. », identique que le compte existe ou non, durée minimale de 1 s),
+  429 (« Trop de tentatives. Réessayez dans 15 minutes. »), 419 (jeton CSRF).
+- **Double authentification** : champ `code` + champ caché `mode`
+  (`totp` ou `recovery`, pour afficher l'erreur sur le bon formulaire). Les
+  espaces d'un code TOTP sont retirés (« 123 456 »). 401 si code faux ou rejoué,
+  429 après 5 échecs, retour à la connexion si l'attente a expiré (5 min).
+- **Projet** : champs `section`, `title`, `slug` (vide : depuis le titre ;
+  unicité par `Project::uniqueSlug`, un message signale le suffixe ajouté),
+  `summary`, `context`, `work_done`, `learnings` (10 000 caractères maximum :
+  une colonne TEXT tient 65 535 octets), `youtube_id` (adresse ou identifiant),
+  `external_url`, `external_label`, `status`, `project_date`, `position`,
+  `is_published`, `is_featured`, `category_ids[]`, `tag_ids[]`, `new_tags`
+  (« Lua, Docker » : un tag de même nom, sans tenir compte de la casse ni des
+  accents, est réutilisé). Champ caché facultatif `section` sur les actions en
+  ligne (`publier`, `vedette`, `supprimer`) : retour sur la liste filtrée.
+- **Images** : `images[]` (10 fichiers maximum par envoi, sinon rien n'est
+  enregistré), `alt_text` (texte alternatif par défaut, sinon le titre du
+  projet). Succès partiel possible : un message par fichier refusé, nom
+  d'origine nettoyé et échappé. Le champ caché `MAX_FILE_SIZE` n'est qu'une
+  indication : la vérification réelle est celle d'`ImageProcessor`.
+
+### 8 bis. Composants
+
+| Classe | Rôle |
+|---|---|
+| `.filter-bar` (`nav`) | rangée de liens `.btn.btn--secondary.btn--sm` ; l'entrée active porte `aria-current="page"` (fond accent doux) |
+| `.filter-bar__count` | nombre mono discret dans un lien du filtre |
+| `.btn[aria-pressed="true"]` | bouton bascule enfoncé (ex. « En avant ») : bordure et texte accent. Avec `partial('admin/post-button', ['pressed' => true/false, …])` |
+| `.btn-row--even` | rangée de boutons dont les boutons texte ont une largeur minimale commune (108 px) : alignement d'une ligne de tableau à l'autre |
+| `.list-head` | titre de liste (`h2.section-title`) + bouton à droite, sur une ligne |
+| `.table tbody th` | en-tête de ligne (`<th scope="row">`) : même graisse qu'une cellule (le lien `.table__title` reste en gras) |
+| `a.table__link` | lien secondaire sous le titre d'une ligne (ex. adresse publique `/projet/slug`, nouvel onglet) |
+| `.table--compact .table__sub` | dans un tableau compact, le sous-titre (slug) peut être coupé n'importe où : le tableau tient en 390 px |
+| `.col-secondary` | colonne de tableau masquée sous 640 px (sur `th` ET `td`) pour garder les actions visibles ; à combiner avec `.table--compact` si le tableau doit tenir en 390 px |
+| `.alert-list` | liste (`ul`) d'alertes statiques `partial('site/alert', [… 'role' => ''])` |
+| `.item-list`, `__item`, `__main`, `__title`, `__meta` | liste d'éléments dans une `.card` (derniers messages, brouillons) ; `__item.is-unread` ajoute une pastille accent devant le titre |
+| `.danger-zone` | carte de suppression sous un formulaire de modification (`.card.card--pad.stack.danger-zone`) |
+| `.disclosure`, `.disclosure__body` | bloc repliable `<details>` (ex. « Utiliser un code de secours ») |
+| `.auth-card__alt` | lien secondaire centré sous un formulaire d'authentification |
+| `.input--code` | saisie d'un code à 6 chiffres (grande taille, espacement) ; avec `.input--mono` |
+
+```php
+<nav class="filter-bar" aria-label="Filtrer par section">
+    <a class="btn btn--secondary btn--sm" href="/admin/projets" aria-current="page">Tous <span class="filter-bar__count">5</span></a>
+    <a class="btn btn--secondary btn--sm" href="/admin/projets?section=game">Jeux <span class="filter-bar__count">4</span></a>
+</nav>
+
+<div class="list-head">
+    <h2 class="section-title" id="titre-jeux">Jeux (Roblox)</h2>
+    <a class="btn btn--ghost btn--sm" href="/admin/categories/nouveau?section=game">Ajouter</a>
+</div>
+
+<section class="card" aria-labelledby="titre-messages">
+    <div class="card__head"><h2 class="card__title" id="titre-messages">Derniers messages</h2></div>
+    <ul class="item-list">
+        <li class="item-list__item is-unread">
+            <div class="item-list__main">
+                <a class="item-list__title" href="/admin/messages/3">Proposition de stage</a>
+                <span class="item-list__meta">Claire Martin · 03/11/2026 à 12:20</span>
+            </div>
+            <span class="badge badge--unread">Non lu</span>
+        </li>
+    </ul>
+</section>
+```
+
+Formulaires longs (projet) : chaque groupe de champs est une
+`<section class="card card--pad stack">` avec un `h2.section-title`, le
+`<form class="form">` les espace, et la barre `.form__actions--sticky` est
+placée directement dans le formulaire (hors des cartes) pour couvrir toute la
+largeur du contenu.
+
+### 10 bis. Comportements JavaScript (`admin.js`, section lot A)
+
+| Attribut | Effet |
+|---|---|
+| `data-max-files="10"` (sur `input[type=file]`) | au-delà du nombre de fichiers, l'envoi est bloqué (`setCustomValidity`), un message `.field__error` (id `{id}-nombre`, `aria-live`) est affiché et relié par `aria-describedby`. Le serveur refuse de toute façon |
+| `data-busy-label="Envoi en cours…"` (sur un bouton submit) | une fois l'envoi réellement parti (pas annulé par `data-confirm` ni par la validation du navigateur), le bouton est désactivé (`disabled` + `aria-disabled`) et affiche ce texte : pas de double envoi. Rétabli si la page revient du cache (bouton Retour) |
+
+---
+
 ## Ajouts administration (lot B)
 
 Parcours, compétences, catégories de compétences, centres d'intérêt,
