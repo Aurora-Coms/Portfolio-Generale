@@ -1,0 +1,334 @@
+{
+  "_comment": "Tickets du projet GitHub « Portfolio » (Aurora-Coms, projet n°6). Lu par .github/scripts/sync-project.js. Champs : status (Backlog, Ready, In progress, In review, Done), priority (P0, P1, P2), size (XS, S, M, L, XL), start / end (AAAA-MM-JJ). Le numéro d'issue est ajouté automatiquement à la création.",
+  "project": {
+    "org": "Aurora-Coms",
+    "number": 6
+  },
+  "items": [
+    {
+      "key": "noyau",
+      "title": "Noyau sécurisé : routage, sessions, CSRF, PDO, gestion des erreurs",
+      "labels": [
+        "enhancement",
+        "sécurité"
+      ],
+      "status": "Done",
+      "priority": "P0",
+      "size": "L",
+      "start": "2026-11-03",
+      "end": "2026-11-03",
+      "body": "Contrôleur frontal, routeur avec vérification CSRF automatique de toutes les requêtes POST, session sécurisée (HttpOnly, Secure, SameSite=Strict, préfixe __Host-), PDO avec vraies requêtes préparées, authentification avec limitation des tentatives, validation, Markdown sûr, client SMTP, `.htaccess` (HTTPS forcé, CSP stricte, en-têtes de sécurité).\n\n- [x] Noyau `app/Core`\n- [x] `.htaccess` public et dossier uploads sans exécution\n- [x] Tests unitaires `tests/core-test.php`",
+      "issue": 1
+    },
+    {
+      "key": "bdd",
+      "title": "Base de données : schéma normalisé et données de départ",
+      "labels": [
+        "enhancement"
+      ],
+      "status": "In progress",
+      "priority": "P0",
+      "size": "M",
+      "start": "2026-11-03",
+      "end": "2026-11-04",
+      "body": "Fichier `database.sql` importable dans phpMyAdmin : projets, catégories (N-N), tags (N-N), images, parcours, compétences, centres d'intérêt, messages, réglages, admin, codes de secours, limitation des tentatives.\n\n- [x] Schéma\n- [ ] Données de départ (TARDIS, Portail de la TVA, Cardverse, OS Fondationnaire en brouillon, parcours, compétences)\n- [ ] Modèles PHP testés (`tests/models-test.php`)",
+      "issue": 2
+    },
+    {
+      "key": "design",
+      "title": "Design « éditeur de code » (maquette E) : CSS, gabarits, JavaScript",
+      "labels": [
+        "enhancement",
+        "design"
+      ],
+      "status": "In progress",
+      "priority": "P0",
+      "size": "L",
+      "start": "2026-11-03",
+      "end": "2026-11-04",
+      "body": "Thème sombre validé : logo `>_` + nom et classe, navigation en onglets, présentation avec fenêtre de code Lua, cartes de projets façon fichiers `.lua`, barre d'état en pied de page. Mobile d'abord, accessible (contrastes AA, focus visible, animations désactivées si l'utilisateur le demande), sans tirets longs dans les textes.\n\n- [ ] `site.css`, `admin.css`\n- [ ] `site.js` (menu, filtres, texte qui s'écrit, apparition au scroll, galerie, vidéo YouTube après clic)\n- [ ] Open Graph et image d'aperçu LinkedIn\n- [ ] `docs/STYLEGUIDE.md`",
+      "issue": 3
+    },
+    {
+      "key": "public",
+      "title": "Pages publiques : accueil, projets, détail, parcours, compétences, à propos, contact",
+      "labels": [
+        "enhancement",
+        "site public"
+      ],
+      "status": "In progress",
+      "priority": "P0",
+      "size": "XL",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "body": "- [ ] Accueil (bandeau de stage, présentation, projets mis en avant, parcours)\n- [ ] Projets de jeux et projets techniques filtrables par catégorie\n- [ ] Détail d'un projet (galerie, vidéo YouTube optionnelle, contexte, réalisations, technologies, apprentissages, statut, date)\n- [ ] Parcours (timeline), compétences (niveaux), à propos\n- [ ] Contact (enregistrement en base + e-mail, anti-spam : piège, jeton horodaté, limitation)\n- [ ] CV PDF, mentions légales et RGPD, sitemap.xml, robots.txt",
+      "issue": 4
+    },
+    {
+      "key": "admin-a",
+      "title": "Administration : connexion, tableau de bord, projets, images, catégories, tags",
+      "labels": [
+        "enhancement",
+        "admin"
+      ],
+      "status": "In progress",
+      "priority": "P0",
+      "size": "L",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "body": "- [ ] Connexion sécurisée (limitation des tentatives, 2FA)\n- [ ] Tableau de bord avec alertes de sécurité et de configuration\n- [ ] CRUD projets (brouillon, mise en avant, catégories, tags)\n- [ ] Upload d'images (vérification du type réel, ré-encodage, miniatures, ordre, couverture)\n- [ ] CRUD catégories et tags",
+      "issue": 5
+    },
+    {
+      "key": "admin-b",
+      "title": "Administration : parcours, compétences, à propos, messages, réglages, compte",
+      "labels": [
+        "enhancement",
+        "admin"
+      ],
+      "status": "In progress",
+      "priority": "P0",
+      "size": "L",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "body": "- [ ] CRUD parcours, compétences, catégories de compétences, centres d'intérêt\n- [ ] Texte « À propos »\n- [ ] Messages reçus (lu / non lu, suppression)\n- [ ] Réglages du site, bandeau de stage, envoi du CV\n- [ ] Changement de mot de passe et double authentification",
+      "issue": 6
+    },
+    {
+      "key": "2fa",
+      "title": "Double authentification TOTP avec QR code et codes de secours",
+      "labels": [
+        "enhancement",
+        "sécurité"
+      ],
+      "status": "In progress",
+      "priority": "P1",
+      "size": "M",
+      "start": "2026-11-03",
+      "end": "2026-11-04",
+      "body": "TOTP conforme RFC 6238 (Google Authenticator, Aegis, 2FAS…), générateur de QR code écrit en PHP pur et vérifié par décodage réel, secret chiffré en AES-256-GCM, anti-rejeu, 8 codes de secours hachés à usage unique.",
+      "issue": 7
+    },
+    {
+      "key": "docs",
+      "title": "Documentation : README Hostinger pas à pas, SECURITE.md, création du compte admin",
+      "labels": [
+        "documentation"
+      ],
+      "status": "In progress",
+      "priority": "P1",
+      "size": "M",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "body": "- [ ] README : base de données, import SQL, config.php, envoi des fichiers, SSL, compte admin, lien LinkedIn\n- [ ] `public_html/setup-admin.php` (usage unique) et `app/tools/create-admin.php` (SSH)\n- [ ] `docs/SECURITE.md` : explication de chaque mesure de sécurité\n- [ ] `docs/ROADMAP.md`",
+      "issue": 8
+    },
+    {
+      "key": "review",
+      "title": "Revue de sécurité indépendante et tests d'intégration complets",
+      "labels": [
+        "sécurité"
+      ],
+      "status": "Ready",
+      "priority": "P0",
+      "size": "L",
+      "start": "2026-11-04",
+      "end": "2026-11-05",
+      "body": "Tests de bout en bout en local (serveur PHP + MariaDB) et revue adversariale : injections SQL, XSS, CSRF, contournement d'authentification, uploads malveillants, en-têtes, fuites d'erreurs, accessibilité, rendu mobile. Chaque défaut trouvé fait l'objet d'une issue `bug`.",
+      "issue": 9
+    },
+    {
+      "key": "pr",
+      "title": "Pull request : intégrer le site dans main",
+      "labels": [],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "S",
+      "start": "2026-11-05",
+      "end": "2026-11-06",
+      "body": "Ouverture de la pull request `claude/portfolio-site` → `main` une fois les tests et la revue terminés, puis relecture et fusion.",
+      "issue": 10
+    },
+    {
+      "key": "contenu",
+      "title": "Vérifier et corriger les textes supposés (docs/CONTENU-A-VERIFIER.md)",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "M",
+      "start": "2026-11-06",
+      "end": "2026-11-13",
+      "body": "Certains contenus ont été rédigés sans information précise : détails techniques des projets, niveaux de compétences, missions de stage. Tout est listé dans `docs/CONTENU-A-VERIFIER.md` et modifiable depuis l'administration.",
+      "issue": 11
+    },
+    {
+      "key": "os-fondationnaire",
+      "title": "Décrire le projet « OS Fondationnaire » puis le publier",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P1",
+      "size": "S",
+      "start": "2026-11-06",
+      "end": "2026-11-13",
+      "body": "Projet créé en brouillon (mis en avant). À préciser : à quoi sert cet OS, ce qui a été codé, captures, statut. Puis cocher « Publié » dans l'administration.",
+      "issue": 12
+    },
+    {
+      "key": "reel-os",
+      "title": "Décrire le projet « Création d'un réel OS » puis le publier",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P1",
+      "size": "S",
+      "start": "2026-11-06",
+      "end": "2026-11-13",
+      "body": "Projet technique créé en brouillon. À préciser : langage (C, assembleur, Rust…), démarrage (QEMU, VirtualBox, clé USB), fonctionnalités déjà en place, captures.",
+      "issue": 13
+    },
+    {
+      "key": "stages",
+      "title": "Préciser les dates et missions des 6 stages",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P1",
+      "size": "S",
+      "start": "2026-11-06",
+      "end": "2026-11-13",
+      "body": "Les stages sont regroupés en une seule entrée du parcours. Idéalement : une entrée par stage (lieu, dates, missions) depuis Administration › Parcours.",
+      "issue": 14
+    },
+    {
+      "key": "medias",
+      "title": "Ajouter les captures d'écran et vidéos des projets",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P1",
+      "size": "M",
+      "start": "2026-11-06",
+      "end": "2026-11-20",
+      "body": "Administration › Projets › Images (JPEG, PNG ou WebP, 8 Mo max, redimensionnées automatiquement). Vidéos : coller le lien YouTube dans la fiche du projet.",
+      "issue": 15
+    },
+    {
+      "key": "liens-cv",
+      "title": "Renseigner LinkedIn, GitHub, e-mail de contact et téléverser le CV",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "XS",
+      "start": "2026-11-06",
+      "end": "2026-11-08",
+      "body": "Administration › Réglages : liens LinkedIn et GitHub, e-mail qui reçoit les messages du formulaire, envoi du CV (PDF, 5 Mo max).",
+      "issue": 16
+    },
+    {
+      "key": "hostinger",
+      "title": "Mettre en ligne sur Hostinger (base, config.php, fichiers)",
+      "labels": [
+        "déploiement",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "M",
+      "start": "2026-11-06",
+      "end": "2026-11-10",
+      "body": "Suivre le README : créer la base MySQL, importer `database.sql`, préparer `config.php`, envoyer `public_html/` et `app/` (à côté, jamais dedans).",
+      "issue": 17
+    },
+    {
+      "key": "ssl",
+      "title": "Activer le SSL et vérifier les en-têtes de sécurité en ligne",
+      "labels": [
+        "déploiement",
+        "sécurité",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "S",
+      "start": "2026-11-08",
+      "end": "2026-11-10",
+      "body": "Certificat SSL gratuit dans hPanel, vérification de la redirection HTTPS, test sur securityheaders.com et MDN Observatory.",
+      "issue": 18
+    },
+    {
+      "key": "admin-prod",
+      "title": "Créer le compte admin en ligne, supprimer setup-admin.php, activer la 2FA",
+      "labels": [
+        "déploiement",
+        "sécurité",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P0",
+      "size": "S",
+      "start": "2026-11-08",
+      "end": "2026-11-10",
+      "body": "- [ ] Ouvrir `/setup-admin.php` avec le jeton d'installation\n- [ ] Supprimer le fichier et vider `setup_token`\n- [ ] Activer la double authentification et conserver les codes de secours hors ligne",
+      "issue": 19
+    },
+    {
+      "key": "smtp",
+      "title": "Créer la boîte mail et configurer l'envoi SMTP du formulaire",
+      "labels": [
+        "déploiement",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P2",
+      "size": "S",
+      "start": "2026-11-10",
+      "end": "2026-11-14",
+      "body": "hPanel › E-mails : créer une adresse sur le domaine, puis renseigner `smtp.hostinger.com`, port 465, `ssl` dans `config.php`. Tester le formulaire de contact.",
+      "issue": 20
+    },
+    {
+      "key": "linkedin",
+      "title": "Ajouter le lien du portfolio sur LinkedIn",
+      "labels": [
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P1",
+      "size": "XS",
+      "start": "2026-11-10",
+      "end": "2026-11-14",
+      "body": "Coordonnées (site web « Portfolio »), section Sélection, puis rafraîchir l'aperçu avec LinkedIn Post Inspector.",
+      "issue": 21
+    },
+    {
+      "key": "projets-tech",
+      "title": "Ajouter des projets techniques (TP réseau, cybersécurité, CTF)",
+      "labels": [
+        "contenu",
+        "à faire par Alexandre"
+      ],
+      "status": "Backlog",
+      "priority": "P2",
+      "size": "M",
+      "start": "2026-11-14",
+      "end": "2026-12-19",
+      "body": "La page Projets techniques affiche un message d'attente tant qu'aucun projet n'est publié. Idées : TP VLAN / routage sur Packet Tracer, analyse Wireshark, write-up de CTF, serveur maison.",
+      "issue": 22
+    }
+  ]
+}
