@@ -445,6 +445,33 @@
         }
     }
 
+    /* -------------------------------------------------------------------------
+       9. Rangées qui défilent horizontalement (.tabs, .filters__list) sur
+       téléphone : Chrome ne fait pas défiler un élément déjà partiellement
+       visible, l'onglet ou la puce focalisé au clavier restait à moitié hors
+       champ. On l'amène entièrement à l'écran (marge : scroll-padding-inline).
+       Seulement au clavier (:focus-visible) : au clic ou au toucher, la rangée
+       ne doit pas bouger entre l'appui et le relâchement (le clic serait perdu).
+       ---------------------------------------------------------------------- */
+    function initScrollRows() {
+        each('.tabs, .filters__list', function (row) {
+            row.addEventListener('focusin', function (ev) {
+                var el = ev.target;
+                if (typeof el.scrollIntoView !== 'function') {
+                    return;
+                }
+                try {
+                    if (!el.matches(':focus-visible')) {
+                        return;
+                    }
+                } catch (e) {
+                    return; // :focus-visible inconnu : comportement par défaut
+                }
+                el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            });
+        });
+    }
+
     function init() {
         initMenu();
         initTypewriter();
@@ -454,6 +481,7 @@
         initYoutube();
         initCounters();
         initErrorFocus();
+        initScrollRows();
     }
 
     if (document.readyState === 'loading') {

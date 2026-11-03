@@ -78,7 +78,7 @@
     --c-text-soft: #ABB0C4;
     --c-text-muted: #8C91A8;
     --c-comment: #7D839B;
-    --c-lineno: #656B82;
+    --c-lineno: #7D839B; /* aligné sur site.css (4,52:1 sur --c-panel) */
 
     --c-accent: #C3A6FF;
     --c-accent-hover: #D4BDFF;

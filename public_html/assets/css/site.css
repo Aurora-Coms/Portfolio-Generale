@@ -82,7 +82,7 @@
     --c-text-soft: #ABB0C4;     /* paragraphes secondaires */
     --c-text-muted: #8C91A8;    /* libellés discrets */
     --c-comment: #7D839B;       /* « -- commentaires » (jamais sur une puce) */
-    --c-lineno: #656B82;        /* numéros de ligne (décoratifs) */
+    --c-lineno: #7D839B;        /* numéros de ligne (décoratifs, 4,52:1 sur --c-panel) */
 
     --c-accent: #C3A6FF;        /* violet : mot-clé, actif, focus */
     --c-accent-hover: #D4BDFF;
@@ -947,10 +947,11 @@ main:focus {
 .tok-com { color: var(--c-comment); }
 .tok-fn { color: var(--c-text-strong); }
 
-/* Curseur clignotant « ▍ ». */
+/* Curseur « ▍ » : clignote 4 fois (4,4 s, sous la limite de 5 s de WCAG 2.2.2)
+   puis reste affiché, fixe. Aucun clignotement si mouvement réduit (§ 23). */
 .cursor {
     color: var(--c-accent);
-    animation: blink 1.1s steps(1) infinite;
+    animation: blink 1.1s steps(1) 4;
 }
 
 @keyframes blink {
@@ -998,6 +999,19 @@ main:focus {
     overflow-x: auto;
     scrollbar-width: thin;
     padding-bottom: 4px;
+}
+
+/* Rangée défilante (téléphone) : 4 px de marge intérieure pour que le contour
+   de focus des puces (2 px + 2 px de décalage) ne soit pas rogné par la zone
+   qui défile ; la marge négative garde la position des puces et l'espace
+   sous la rangée. scroll-padding-inline : la puce focalisée amenée à l'écran
+   par site.js (initScrollRows) garde ce même espace pour son contour. */
+@media (max-width: 639px) {
+    .filters__list {
+        margin: -4px;
+        padding: 4px 4px 8px;
+        scroll-padding-inline: 4px;
+    }
 }
 
 @media (min-width: 640px) {
