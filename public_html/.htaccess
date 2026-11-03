@@ -1,0 +1,92 @@
+# =============================================================================
+#  Configuration Apache / LiteSpeed (Hostinger) du portfolio
+# =============================================================================
+
+# Pas de listing des dossiers, pas de négociation de contenu.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+ServerSignature Off
+
+# -----------------------------------------------------------------------------
+#  Réécriture d'URL
+# -----------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. HTTPS obligatoire (redirection permanente).
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. (Optionnel) Forcer « www. » : décommentez les deux lignes suivantes.
+    # RewriteCond %{HTTP_HOST} !^www\. [NC]
+    # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 3. Fichiers cachés (.git, .env, .htaccess…) interdits, sauf .well-known (SSL).
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    # 4. Fichiers sensibles interdits même s'ils étaient envoyés par erreur.
+    RewriteRule \.(sql|bak|old|orig|save|swp|log|ini|sh|md|lock|dist|env|example|tar|gz|zip)$ - [F,L,NC]
+
+    # 5. Seuls index.php et (temporairement) setup-admin.php peuvent être exécutés.
+    RewriteCond %{REQUEST_URI} !^/(index|setup-admin)\.php$
+    RewriteRule \.(php\d?|phtml|phar)$ - [F,L,NC]
+
+    # 6. Tout le reste passe par le contrôleur frontal (sauf fichiers existants).
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# -----------------------------------------------------------------------------
+#  En-têtes de sécurité
+# -----------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Politique de sécurité du contenu : uniquement nos propres fichiers.
+    # Aucun script ni style en ligne autorisé. Seule exception : le lecteur
+    # YouTube (domaine sans cookie), chargé uniquement après un clic.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    # Interdit l'affichage du site dans un cadre (anti-clickjacking).
+    Header always set X-Frame-Options "DENY"
+    # Le navigateur ne doit pas « deviner » le type des fichiers.
+    Header always set X-Content-Type-Options "nosniff"
+    # N'envoie que l'origine (pas le chemin complet) aux sites externes.
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Désactive les API sensibles du navigateur.
+    Header always set Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
+    # HTTPS obligatoire pendant 1 an pour ce domaine et ses sous-domaines.
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    # Isole la page des fenêtres d'autres origines.
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    # Ne pas révéler la technologie du serveur.
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+</IfModule>
+
+# -----------------------------------------------------------------------------
+#  Performances : compression et cache des fichiers statiques
+# -----------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/xml text/plain
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                 "access plus 1 year"
+    ExpiresByType application/javascript   "access plus 1 year"
+    ExpiresByType font/woff2               "access plus 1 year"
+    ExpiresByType image/webp               "access plus 1 month"
+    ExpiresByType image/jpeg               "access plus 1 month"
+    ExpiresByType image/png                "access plus 1 month"
+    ExpiresByType image/svg+xml            "access plus 1 month"
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+    AddType image/webp .webp
+    AddType image/svg+xml .svg
+</IfModule>
+
+# Page d'erreur 403/404 servie par l'application.
+ErrorDocument 403 /index.php
+ErrorDocument 404 /index.php

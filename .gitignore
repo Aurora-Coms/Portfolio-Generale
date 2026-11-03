@@ -1,0 +1,10 @@
+# Configuration locale (identifiants !)
+/app/config.php
+# Données générées
+/app/storage/logs/*
+/app/storage/sessions/*
+/app/storage/cv/*
+/public_html/uploads/projects/*
+!**/.gitkeep
+!**/.htaccess
+/dist/
