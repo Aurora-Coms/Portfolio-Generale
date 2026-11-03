@@ -26,7 +26,7 @@
       "labels": [
         "enhancement"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P0",
       "size": "M",
       "start": "2026-11-03",
@@ -41,7 +41,7 @@
         "enhancement",
         "design"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P0",
       "size": "L",
       "start": "2026-11-03",
@@ -56,7 +56,7 @@
         "enhancement",
         "site public"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P0",
       "size": "XL",
       "start": "2026-11-03",
@@ -71,7 +71,7 @@
         "enhancement",
         "admin"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P0",
       "size": "L",
       "start": "2026-11-03",
@@ -86,7 +86,7 @@
         "enhancement",
         "admin"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P0",
       "size": "L",
       "start": "2026-11-03",
@@ -101,7 +101,7 @@
         "enhancement",
         "sécurité"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P1",
       "size": "M",
       "start": "2026-11-03",
@@ -115,7 +115,7 @@
       "labels": [
         "documentation"
       ],
-      "status": "In progress",
+      "status": "Done",
       "priority": "P1",
       "size": "M",
       "start": "2026-11-03",
@@ -129,7 +129,7 @@
       "labels": [
         "sécurité"
       ],
-      "status": "Ready",
+      "status": "In progress",
       "priority": "P0",
       "size": "L",
       "start": "2026-11-04",
@@ -141,7 +141,7 @@
       "key": "pr",
       "title": "Pull request : intégrer le site dans main",
       "labels": [],
-      "status": "Backlog",
+      "status": "Done",
       "priority": "P0",
       "size": "S",
       "start": "2026-11-05",
