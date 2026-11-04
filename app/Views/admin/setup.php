@@ -4,7 +4,8 @@
  * Rendue par public_html/setup-admin.php avec le gabarit layouts/admin-auth.
  *
  * Variables :
- *   $state     string  'form' | 'created' | 'exists' | 'disabled' | 'insecure' | 'database'
+ *   $state     string  'install' | 'form' | 'created' | 'exists' | 'disabled' | 'insecure' | 'database'
+ *   $installed bool    (state 'form') la base vient d'être installée
  *   $errors    array   erreurs par champ (setup_token, username, password, password_confirmation)
  *   $old       array   valeurs saisies à réafficher (username uniquement : jamais de secret)
  *   $error     string  erreur générale (CSRF, limitation…)
@@ -20,6 +21,7 @@ $old       = isset($old) && is_array($old) ? $old : [];
 $error     = (string) ($error ?? '');
 $username  = (string) ($username ?? '');
 $minLength = (int) ($minLength ?? 24);
+$installed = (bool) ($installed ?? false);
 ?>
 <p class="auth-card__comment" aria-hidden="true">-- installation.lua</p>
 <?php if ($state === 'created'): ?>
@@ -85,6 +87,38 @@ $minLength = (int) ($minLength ?? 24);
     <p class="small text-soft">Activez d'abord le certificat SSL du domaine (hPanel, rubrique Sécurité puis SSL), puis ouvrez l'adresse en <code>https://</code>.</p>
 </div>
 
+<?php elseif ($state === 'install'): ?>
+<h1 class="auth-card__title">Installer la base de données</h1>
+<p class="auth-card__lead">La base est vide : première étape de l'installation.</p>
+<?php if ($error !== ''): ?>
+<div class="flashes">
+    <?= partial('site/alert', ['type' => 'error', 'message' => $error]) ?>
+</div>
+<?php elseif ($errors !== []): ?>
+<div class="flashes">
+    <?= partial('site/alert', ['type' => 'error', 'message' => 'Corrigez le champ signalé ci-dessous.']) ?>
+</div>
+<?php endif; ?>
+<div class="prose small text-soft">
+    <p>Ce bouton crée les tables et les contenus de départ (projets, parcours, compétences) à partir du fichier <code>database.sql</code> du projet. Il ne fonctionne que sur une base vide.</p>
+</div>
+<form class="form" method="post" action="/setup-admin.php" novalidate data-focus-error>
+    <?= csrf_field() ?>
+    <?= partial('site/field', [
+        'name'     => 'setup_token',
+        'type'     => 'password',
+        'label'    => 'Jeton d\'installation',
+        'hint'     => 'La valeur de setup_token dans app/config.php.',
+        'required' => true,
+        'error'    => $errors['setup_token'] ?? '',
+        'class'    => 'input--mono',
+        'attrs'    => ['autocomplete' => 'off', 'autocapitalize' => 'none', 'spellcheck' => 'false'],
+    ]) ?>
+    <div class="form__actions">
+        <button type="submit" class="btn btn--primary btn--block">Installer la base de données</button>
+    </div>
+</form>
+
 <?php elseif ($state === 'database'): ?>
 <h1 class="auth-card__title">Base de données inaccessible</h1>
 <p class="auth-card__lead">Le compte ne peut pas être créé pour l'instant.</p>
@@ -107,6 +141,11 @@ $minLength = (int) ($minLength ?? 24);
 <?php else: ?>
 <h1 class="auth-card__title">Créer le compte administrateur</h1>
 <p class="auth-card__lead">Première installation du site. Ce formulaire ne fonctionne qu'une seule fois.</p>
+<?php if ($installed): ?>
+<div class="flashes">
+    <?= partial('site/alert', ['type' => 'success', 'message' => 'Base de données installée. Créez maintenant votre compte administrateur.']) ?>
+</div>
+<?php endif; ?>
 <?php if ($error !== ''): ?>
 <div class="flashes">
     <?= partial('site/alert', ['type' => 'error', 'message' => $error]) ?>

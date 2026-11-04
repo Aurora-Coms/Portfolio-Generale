@@ -9,6 +9,10 @@
  *      l'identifiant et le mot de passe choisis.
  *   3. SUPPRIMEZ ensuite ce fichier et videz setup_token ('').
  *
+ * Si la base de données est encore VIDE (aucune table), la page propose d'abord
+ * d'y installer database.sql (à la racine du projet, jamais servi par le web),
+ * avec le même jeton : utile quand phpMyAdmin n'est pas disponible.
+ *
  * Sécurité :
  *  - inactif tant que setup_token est vide ou trop court (403) ;
  *  - inutilisable dès qu'un administrateur existe (410) ;
@@ -31,6 +35,7 @@ use App\Core\Csrf;
 use App\Core\HttpException;
 use App\Core\Request;
 use App\Core\Session;
+use App\Core\SqlImporter;
 use App\Core\Throttle;
 use App\Core\View;
 use App\Models\Admin;
@@ -80,7 +85,79 @@ if (!Config::isDev() && !Request::isHttps()) {
     setup_render('insecure', 403);
 }
 
-// 3. Un administrateur existe déjà : le script n'a plus aucune utilité.
+/** Vérifie CSRF + jeton d'installation d'une requête POST ; affiche l'état $state en cas d'échec. */
+function setup_check_post(string $state, string $setupToken, array $old = []): void
+{
+    try {
+        Csrf::verifyRequest();
+    } catch (HttpException $e) {
+        setup_render($state, $e->status, [
+            'old'   => $old,
+            'error' => $e->getMessage() !== '' ? $e->getMessage() : 'Requête refusée : rechargez la page puis réessayez.',
+        ]);
+    }
+    $ip = Request::ip();
+    // La table throttle n'existe pas encore avant l'installation de la base :
+    // le jeton (24 caractères aléatoires au moins) reste impossible à deviner.
+    try {
+        if (Throttle::tooMany('setup', $ip, SETUP_MAX_FAILS, SETUP_WINDOW)) {
+            setup_render($state, 429, [
+                'old'   => $old,
+                'error' => 'Trop de tentatives avec un jeton erroné. Patientez 15 minutes avant de réessayer.',
+            ]);
+        }
+    } catch (PDOException) {
+    }
+    $sentToken = trim(Request::post('setup_token'));
+    if ($sentToken === '' || !hash_equals($setupToken, $sentToken)) {
+        try {
+            Throttle::hit('setup', $ip);
+        } catch (PDOException) {
+        }
+        error_log('[setup] Jeton d\'installation invalide.');
+        setup_render($state, 422, [
+            'old'    => $old,
+            'errors' => ['setup_token' => 'Jeton d\'installation incorrect.'],
+        ]);
+    }
+}
+
+// 3. Base vide : proposer d'installer database.sql avant tout.
+$sqlFile = dirname(APP_PATH) . '/database.sql';
+try {
+    $emptyDatabase = SqlImporter::databaseIsEmpty();
+} catch (Throwable $e) {
+    error_log('[setup] Base de données inaccessible : ' . $e::class . ': ' . $e->getMessage());
+    setup_render('database', 503);
+}
+if ($emptyDatabase) {
+    if (!is_file($sqlFile)) {
+        setup_render('database', 503);
+    }
+    if ($method !== 'POST') {
+        setup_render('install', 200);
+    }
+    setup_check_post('install', $setupToken);
+    try {
+        // Revérification juste avant : on n'écrase jamais une base déjà remplie.
+        if (!SqlImporter::databaseIsEmpty()) {
+            redirect('/setup-admin.php');
+        }
+        $count = SqlImporter::importFile($sqlFile);
+    } catch (Throwable $e) {
+        error_log('[setup] Échec de l\'installation de la base : ' . $e::class . ': ' . $e->getMessage());
+        setup_render('install', 500, [
+            'error' => 'L\'installation de la base a échoué. Consultez app/storage/logs/php-errors.log.',
+        ]);
+    }
+    error_log("[setup] Base de données installée ({$count} requêtes).");
+    Session::regenerate();
+    Csrf::rotate();
+    Session::set('_setup_installed', true);
+    redirect('/setup-admin.php');
+}
+
+// 4. Un administrateur existe déjà : le script n'a plus aucune utilité.
 try {
     $adminCount = Admin::count();
 } catch (Throwable $e) {
@@ -99,48 +176,27 @@ if ($adminCount > 0) {
     setup_render('exists', 410);
 }
 
-// 4. Formulaire.
+// 5. Formulaire.
 if ($method !== 'POST') {
-    setup_render('form', 200);
-}
-
-// 4.1 Jeton CSRF + origine (le routeur n'est pas utilisé ici : vérification manuelle).
-try {
-    Csrf::verifyRequest();
-} catch (HttpException $e) {
-    setup_render('form', $e->status, [
-        'error' => $e->getMessage() !== '' ? $e->getMessage() : 'Requête refusée : rechargez la page puis réessayez.',
-    ]);
+    $installed = Session::hasCookie() && Session::get('_setup_installed') === true;
+    if ($installed) {
+        Session::forget('_setup_installed');
+    }
+    setup_render('form', 200, ['installed' => $installed]);
 }
 
 $ip           = Request::ip();
-$username     = trim(Request::input('username'));
-$password     = Request::input('password');
-$confirmation = Request::input('password_confirmation');
+$username     = trim(Request::post('username'));
+$password     = Request::post('password');
+$confirmation = Request::post('password_confirmation');
 $old          = ['username' => $username];
 
-// 4.2 Trop de jetons erronés depuis cette adresse : on ne compare même plus.
-if (Throttle::tooMany('setup', $ip, SETUP_MAX_FAILS, SETUP_WINDOW)) {
-    setup_render('form', 429, [
-        'old'   => $old,
-        'error' => 'Trop de tentatives avec un jeton erroné. Patientez 15 minutes avant de réessayer.',
-    ]);
-}
+// 5.1 Jeton CSRF + origine, limitation, jeton d'installation (temps constant).
+setup_check_post('form', $setupToken, $old);
 
-// 4.3 Jeton d'installation (comparaison en temps constant).
-$sentToken = trim(Request::input('setup_token'));
-if ($sentToken === '' || !hash_equals($setupToken, $sentToken)) {
-    Throttle::hit('setup', $ip);
-    error_log('[setup] Jeton d\'installation invalide.');
-    setup_render('form', 422, [
-        'old'    => $old,
-        'errors' => ['setup_token' => 'Jeton d\'installation incorrect.'],
-    ]);
-}
-
-// 4.4 Identifiant et mot de passe.
+// 5.2 Identifiant et mot de passe.
 $errors = [];
-if (!preg_match('/^[a-zA-Z0-9._-]{3,50}$/', $username)) {
+if (!preg_match(App\Core\Auth::USERNAME_PATTERN, $username)) {
     $errors['username'] = 'L\'identifiant doit faire 3 à 50 caractères : lettres sans accent, chiffres, point, tiret ou tiret bas.';
 }
 $problem = Admin::passwordProblem($password, $errors === [] ? $username : '');
@@ -153,7 +209,7 @@ if ($errors !== []) {
     setup_render('form', 422, ['old' => $old, 'errors' => $errors]);
 }
 
-// 4.5 Création. On revérifie juste avant : deux envois simultanés ne créent
+// 5.3 Création. On revérifie juste avant : deux envois simultanés ne créent
 //     pas deux comptes (l'identifiant est de plus unique en base).
 try {
     if (Admin::count() > 0) {

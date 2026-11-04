@@ -35,17 +35,16 @@ ServerSignature Off
     # 3 bis. Défense en profondeur (ne dépend que de mod_rewrite) : un dossier
     #        app/ ou storage/ posé ici par erreur, et tout fichier de uploads/
     #        qui n'est pas une image au nom généré par le serveur, sont refusés.
+    #        Chemins RELATIFS à ce dossier : les règles marchent aussi quand le
+    #        projet entier est déposé dans la racine du site (voir ../.htaccess).
     RewriteRule ^(app|storage)(/|$) - [F,L,NC]
-    RewriteCond %{REQUEST_URI} ^/uploads/
-    RewriteCond %{REQUEST_URI} !^/uploads/projects/[a-f0-9]{32}(-thumb)?\.(webp|jpg)$
-    RewriteRule ^ - [F,L]
+    RewriteRule ^uploads/(?!projects/[a-f0-9]{32}(?:-thumb)?\.(?:webp|jpg)$) - [F,L]
 
     # 4. Fichiers sensibles interdits même s'ils étaient envoyés par erreur.
     RewriteRule \.(sql|bak|old|orig|save|swp|log|ini|sh|md|lock|dist|env|example|tar|gz|zip)$ - [F,L,NC]
 
     # 5. Seuls index.php et (temporairement) setup-admin.php peuvent être exécutés.
-    RewriteCond %{REQUEST_URI} !^/(index|setup-admin)\.php$
-    RewriteRule \.(php\d?|phtml|phar)$ - [F,L,NC]
+    RewriteRule ^(?!(?:index|setup-admin)\.php$).*\.(php\d?|phtml|phar)$ - [F,L,NC]
 
     # 6. Tout le reste passe par le contrôleur frontal (sauf fichiers existants).
     RewriteCond %{REQUEST_FILENAME} !-f

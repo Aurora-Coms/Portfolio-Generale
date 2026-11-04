@@ -1,0 +1,43 @@
+# =============================================================================
+#  Racine du PROJET (à côté de app/ et public_html/)
+# =============================================================================
+#  Ce fichier ne sert que si le projet ENTIER est déposé dans le dossier
+#  racine du site (par exemple le public_html de Hostinger, quand on ne peut
+#  pas placer app/ à côté). Dans la disposition recommandée (app/ à côté de
+#  public_html), il n'est jamais lu par le serveur web.
+#
+#  Toutes les adresses sont redirigées vers le sous-dossier public_html/ du
+#  projet : app/ (code, config.php), database.sql, docs/, tests/… ne peuvent
+#  donc être atteints par AUCUNE adresse.
+# =============================================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_dir.c>
+    DirectorySlash Off
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. HTTPS obligatoire (avant la redirection interne, pour garder l'adresse propre).
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Tout est servi depuis public_html/ (réécriture interne, invisible).
+    RewriteCond %{REQUEST_URI} !^/public_html/
+    RewriteRule ^(.*)$ public_html/$1 [L]
+</IfModule>
+
+# Sans réécriture d'URL possible : rien n'est servi depuis cette racine.
+<IfModule !mod_rewrite.c>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</IfModule>

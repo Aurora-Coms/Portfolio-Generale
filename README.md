@@ -152,6 +152,13 @@ de Hostinger : en cas de doute, utilisez la barre de recherche de hPanel.
 4. Vérifiez que la colonne de gauche affiche les tables (`projects`, `settings`,
    `admins`…).
 
+> [!TIP]
+> **Sans phpMyAdmin** : laissez la base vide et passez cette étape. Au premier
+> passage sur `setup-admin.php` (étape 7), la page propose **« Installer la base de
+> données »** : avec votre jeton d'installation, elle importe `database.sql` (placé
+> à la racine du projet, jamais servi par le web). Elle ne fonctionne que sur une
+> base **vide** et ne peut donc jamais écraser un site déjà rempli.
+
 > [!CAUTION]
 > `database.sql` **supprime puis recrée** toutes les tables. Ne le réimportez **jamais**
 > sur le site en ligne une fois rempli : vous perdriez vos projets et vos messages.
@@ -305,6 +312,19 @@ suffit en général chez Hostinger, fichiers en **644**) :
 Dans le Gestionnaire de fichiers : clic droit > **Autorisations** (ou « Permissions »).
 Optionnel : passez `app/config.php` en **600** (lisible par vous seul) ; si le site
 affiche ensuite une erreur, remettez **644**.
+
+#### Variante : tout le projet dans `public_html`
+
+Si vous ne pouvez pas placer `app/` **à côté** de `public_html` (déploiement
+automatisé, outil qui n'écrit que dans `public_html`…), déposez le **projet entier**
+dans `public_html` : `public_html/.htaccess` (celui de la racine du projet),
+`public_html/app/`, `public_html/public_html/`, `public_html/database.sql`.
+
+Le `.htaccess` à la racine du projet redirige alors **toutes** les adresses vers le
+sous-dossier `public_html/` : `app/`, `config.php`, `database.sql`, `docs/`… ne sont
+atteignables par aucune adresse (et `app/.htaccess` interdit en plus tout accès
+direct). Cette disposition a été testée sur Apache 2.4 ; la disposition « `app/` à
+côté » reste préférable quand elle est possible.
 
 ### Étape 6 · Activer le SSL (HTTPS)
 
