@@ -262,10 +262,13 @@ jobs:
 
           # Aucune erreur, aucun avertissement PHP ne doit avoir été journalisé
           # (tests CLI et visite HTTP compris).
+          # Les lignes « [auth] … » sont des événements de sécurité VOULUS
+          # (tentatives refusées par tests/auth-security-test.php) : seules les
+          # autres lignes (erreurs, avertissements, dépréciations) font échouer.
           journal=app/storage/logs/php-errors.log
-          if [ -s "$journal" ]; then
+          if [ -s "$journal" ] && grep -vqE '^\[[^]]+\] \[auth\] ' "$journal"; then
             echo "::error title=Journal PHP::Erreurs journalisées dans $journal"
-            cat "$journal"
+            grep -vE '^\[[^]]+\] \[auth\] ' "$journal"
             statut=1
           fi
           if [ "$statut" -ne 0 ]; then
