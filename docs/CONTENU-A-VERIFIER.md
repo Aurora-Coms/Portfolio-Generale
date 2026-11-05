@@ -15,8 +15,8 @@ renseigner obligatoirement.
 
 | Clé | Valeur mise | À vérifier |
 |---|---|---|
-| `linkedin_url` | vide | **[vide]** adresse du profil LinkedIn |
-| `github_url` | vide | **[vide]** adresse GitHub (ou laisser vide si aucun compte) |
+| `linkedin_url` | renseigné | https://www.linkedin.com/in/alexandre-derbez-9b32b4253/ (fourni par Alexandre) |
+| `github_url` | renseigné | https://github.com/ADERBEZ (fourni par Alexandre) |
 | `contact_email` | vide | **[vide]** adresse qui reçoit les messages du formulaire de contact |
 | `hero_tagline` | « En 1re année au Campus St Jean-Baptiste de La Salle à Avignon… » | Accroche rédigée par Claude : la relire |
 | `meta_description` | « Portfolio d'Alexandre Derbez, étudiant en BTS CIEL option IR à Avignon : réseaux, cybersécurité et jeux Roblox en Lua. Recherche de stage en 2026. » (146 caractères) | Texte affiché par Google sous le titre du site |

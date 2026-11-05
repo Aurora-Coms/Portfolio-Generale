@@ -334,8 +334,8 @@ INSERT INTO settings (setting_key, setting_value) VALUES
 ('internship_end',   '2026-06-26'),
 ('location',         'Avignon (84)'),
 -- Liens et adresse de contact : à renseigner depuis l'administration.
-('linkedin_url',     ''),
-('github_url',       ''),
+('linkedin_url',     'https://www.linkedin.com/in/alexandre-derbez-9b32b4253/'),
+('github_url',       'https://github.com/ADERBEZ'),
 ('contact_email',    ''),
 ('meta_description', 'Portfolio d''Alexandre Derbez, étudiant en BTS CIEL option IR à Avignon : réseaux, cybersécurité et jeux Roblox en Lua. Recherche de stage en 2026.'),
 -- Date de mise à jour du CV : remplie automatiquement à l'envoi du PDF.
