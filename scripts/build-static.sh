@@ -37,6 +37,7 @@ for _ in $(seq 1 40); do
 done
 
 # 2. Liste des pages : pages fixes + chaque projet publié.
+# shellcheck disable=SC2016  # code PHP entre apostrophes : pas d'expansion voulue
 mapfile -t PROJETS < <(php -r '
     define("PUBLIC_PATH", getcwd() . "/public_html");
     require "app/bootstrap.php";
