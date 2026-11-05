@@ -137,7 +137,7 @@ CREATE TABLE projects (
     youtube_id      CHAR(11)                     NULL     COMMENT 'Identifiant YouTube seul (jamais d''URL ni d''iframe)',
     external_url    VARCHAR(255)                 NULL,
     external_label  VARCHAR(60)                  NULL,
-    status          ENUM('done','in_progress')   NOT NULL DEFAULT 'in_progress',
+    status          ENUM('done','in_progress','planned') NOT NULL DEFAULT 'in_progress' COMMENT 'planned = projet futur',
     project_date    DATE                         NULL,
     is_published    TINYINT(1)                   NOT NULL DEFAULT 0 COMMENT '0 = brouillon',
     is_featured     TINYINT(1)                   NOT NULL DEFAULT 0 COMMENT '1 = mis en avant sur l''accueil',
@@ -573,30 +573,21 @@ NULL, NULL, NULL, 'in_progress', NULL, 0, 1, 4);
 
 -- -----------------------------------------------------------------------------
 --  Projets techniques (section tech)
---    5 Création d'un réel OS (brouillon)
+--    5 Réalisation d'un système d'exploitation aidé de l'IA (projet futur, publié)
 -- -----------------------------------------------------------------------------
 INSERT INTO projects (id, section, title, slug, summary, context, work_done, learnings,
                       youtube_id, external_url, external_label, status, project_date,
                       is_published, is_featured, position) VALUES
-(5, 'tech', 'Création d''un réel OS', 'creation-d-un-reel-os',
-'Système d''exploitation développé de zéro. Description à compléter depuis l''administration : langage, démarrage, avancement.',
-'À compléter : pourquoi as-tu voulu créer ton propre système d''exploitation ?
+(5, 'tech', 'Réalisation d''un système d''exploitation aidé de l''IA', 'systeme-d-exploitation-aide-de-l-ia',
+'Projet futur : concevoir mon propre système d''exploitation, en m''appuyant sur l''intelligence artificielle comme assistant pour apprendre et développer.',
+'Après avoir découvert le fonctionnement des ordinateurs en maintenance informatique puis en BTS CIEL, je veux comprendre ce qui se passe au plus bas niveau en réalisant moi-même un **système d''exploitation**.
 
-- À compléter : quel est l''objectif (comprendre le fonctionnement d''un ordinateur, relever un défi, usage précis) ?
-- À compléter : pour quelle architecture (x86, x86-64, ARM…) ?
-- À compléter : dans quel environnement le testes-tu (QEMU, VirtualBox, machine réelle) ?',
-'À compléter : qu''est-ce qui fonctionne déjà ?
+L''intelligence artificielle me servira d''**assistant** : pour expliquer les notions, relire mon code et m''aider à avancer, tout en gardant la compréhension de chaque étape.
 
-- À compléter : langage(s) utilisé(s) (C, assembleur, Rust…).
-- À compléter : démarrage (chargeur d''amorçage maison, GRUB / Multiboot, UEFI).
-- À compléter : ce qui est réalisé (affichage texte, clavier, interruptions, gestion de la mémoire, système de fichiers…).
-- À compléter : ce qui est en cours ou prévu.',
-'À compléter : qu''as-tu appris en réalisant ce projet ?
-
-- À compléter : les notions découvertes (mémoire, processeur, matériel).
-- À compléter : la principale difficulté rencontrée et la façon dont tu l''as résolue.
-- À compléter : les liens avec le BTS CIEL (systèmes, électronique, sécurité).',
-NULL, NULL, NULL, 'in_progress', NULL, 0, 1, 1);
+Ce projet n''a pas encore commencé : cette page sera complétée au fil de sa réalisation.',
+NULL,
+NULL,
+NULL, NULL, NULL, 'planned', NULL, 1, 1, 1);
 
 -- -----------------------------------------------------------------------------
 --  Liaisons projets <-> catégories
@@ -611,7 +602,7 @@ WHERE (p.slug = 'tardis'                AND c.slug IN ('roblox', 'sci-fi-tempore
    OR (p.slug = 'portail-de-la-tva'     AND c.slug IN ('roblox', 'sci-fi-temporel'))
    OR (p.slug = 'cardverse'             AND c.slug IN ('roblox', 'systemes-de-jeu'))
    OR (p.slug = 'os-fondationnaire'     AND c.slug IN ('roblox', 'systemes-de-jeu'))
-   OR (p.slug = 'creation-d-un-reel-os' AND c.slug IN ('systemes'));
+   OR (p.slug = 'systeme-d-exploitation-aide-de-l-ia' AND c.slug IN ('systemes'));
 
 -- -----------------------------------------------------------------------------
 --  Liaisons projets <-> tags
@@ -624,7 +615,22 @@ WHERE (p.slug = 'tardis'                AND t.slug IN ('lua', 'luau', 'roblox-st
    OR (p.slug = 'portail-de-la-tva'     AND t.slug IN ('lua', 'luau', 'roblox-studio', 'remoteevents', 'tweenservice'))
    OR (p.slug = 'cardverse'             AND t.slug IN ('lua', 'luau', 'roblox-studio', 'datastore', 'remoteevents', 'modulescripts', 'interface-ui'))
    OR (p.slug = 'os-fondationnaire'     AND t.slug IN ('lua', 'roblox-studio', 'os'))
-   OR (p.slug = 'creation-d-un-reel-os' AND t.slug IN ('os'));
+   OR (p.slug = 'systeme-d-exploitation-aide-de-l-ia' AND t.slug IN ('os'));
+
+-- -----------------------------------------------------------------------------
+--  Images des projets (captures d'Alexandre, ré-encodées en WebP par
+--  App\Core\ImageProcessor). Les fichiers sont versionnés dans
+--  public_html/uploads/projects/. La plus petite position sert de couverture.
+-- -----------------------------------------------------------------------------
+INSERT INTO project_images (project_id, filename, thumb_filename, alt_text, width, height, position) VALUES
+(1, '9080141af0921395dbb15ac53fb12a91.webp', '9080141af0921395dbb15ac53fb12a91-thumb.webp',
+ 'Salle de contrôle du TARDIS dans Roblox Studio : console centrale au rotor lumineux, plafond circulaire gravé et galeries tout autour.', 1259, 598, 0),
+(1, '128fc97b5ef6cc7c3c57ef75508141b4.webp', '128fc97b5ef6cc7c3c57ef75508141b4-thumb.webp',
+ 'Extérieur du TARDIS : cabine de police bleue « Police Public Call Box » posée sur la carte.', 363, 431, 1),
+(1, 'da3e3b88d00ca7494bbf36b31e32b1ae.webp', 'da3e3b88d00ca7494bbf36b31e32b1ae-thumb.webp',
+ 'TARDIS portes ouvertes : l''intérieur, bien plus grand que la cabine, est visible depuis l''extérieur.', 310, 370, 2),
+(2, '3f089788eb3e710280ef279eb4d5d1bf.webp', '3f089788eb3e710280ef279eb4d5d1bf-thumb.webp',
+ 'Portail temporel de la TVA : cadre lumineux blanc, jaune et orange entouré d''un halo, posé sur la carte.', 248, 299, 0);
 
 -- -----------------------------------------------------------------------------
 --  Parcours (timeline). Affichage par date de début décroissante, puis position.

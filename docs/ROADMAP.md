@@ -37,7 +37,7 @@ Tout ce qui a été rédigé sans information précise est listé dans
 - [x] Niveaux des compétences confirmés par Alexandre (thèmes > sous-catégories, 43 compétences) (#11)
 - [ ] Relire les descriptions des compétences (voir [`CONTENU-A-VERIFIER.md`](CONTENU-A-VERIFIER.md), section 6) (#11)
 - [ ] Décrire le projet « OS Fondationnaire » puis cocher **Publié** (#12)
-- [ ] Décrire le projet « Création d'un réel OS » (langage, démarrage, fonctionnalités) puis le publier (#13)
+- [x] Projet « Réalisation d'un système d'exploitation aidé de l'IA » publié comme projet futur (#13)
 - [ ] Préciser les 6 stages : une entrée par stage dans **Parcours** (lieu, dates, missions) (#14)
 - [ ] Vérifier l'adresse de l'hébergeur dans **Réglages > Mentions légales**
 - [ ] Supprimer les catégories et tags inutilisés, ou leur ajouter des projets

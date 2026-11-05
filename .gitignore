@@ -5,6 +5,15 @@
 /app/storage/sessions/*
 /app/storage/cv/*
 /public_html/uploads/projects/*
+# Images de départ des projets (référencées par database.sql) : versionnées
+!/public_html/uploads/projects/9080141af0921395dbb15ac53fb12a91.webp
+!/public_html/uploads/projects/9080141af0921395dbb15ac53fb12a91-thumb.webp
+!/public_html/uploads/projects/128fc97b5ef6cc7c3c57ef75508141b4.webp
+!/public_html/uploads/projects/128fc97b5ef6cc7c3c57ef75508141b4-thumb.webp
+!/public_html/uploads/projects/da3e3b88d00ca7494bbf36b31e32b1ae.webp
+!/public_html/uploads/projects/da3e3b88d00ca7494bbf36b31e32b1ae-thumb.webp
+!/public_html/uploads/projects/3f089788eb3e710280ef279eb4d5d1bf.webp
+!/public_html/uploads/projects/3f089788eb3e710280ef279eb4d5d1bf-thumb.webp
 !**/.gitkeep
 !**/.htaccess
 /dist/

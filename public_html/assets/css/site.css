@@ -1275,6 +1275,7 @@ main:focus {
 .badge--plain::before { display: none; }
 .badge--done, .badge--success { color: var(--c-success); background: var(--c-success-soft); }
 .badge--progress, .badge--warning { color: var(--c-number); background: rgba(245, 166, 107, .12); }
+.badge--planned { color: var(--c-accent); background: var(--c-accent-soft); }
 .badge--accent { color: var(--c-accent); background: var(--c-accent-soft); }
 .badge--error { color: var(--c-error); background: var(--c-error-soft); }
 

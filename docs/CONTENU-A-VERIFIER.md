@@ -103,9 +103,13 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 
 ## 4. Projets techniques
 
-### Création d'un réel OS (BROUILLON, mis en avant)
-- **[à compléter]** Résumé, contexte, travail réalisé et apprentissages : trames « À compléter » (langage, architecture, démarrage, environnement de test, avancement).
-- **[supposé]** Rangé dans la catégorie Systèmes.
+### Réalisation d'un système d'exploitation aidé de l'IA (PUBLIÉ, mis en avant, statut « Projet futur »)
+- **[fourni]** Titre et nature du projet donnés par Alexandre : projet futur, réalisé avec l'aide de l'IA.
+- **[rédigé]** Résumé et contexte rédigés à partir de cette phrase (motivation, rôle de l'IA comme assistant) : à relire. Les sections « Ce que j'ai fait » et « Ce que j'ai appris » sont vides (masquées) tant que le projet n'a pas commencé.
+- **[supposé]** Rangé dans la catégorie Systèmes, tag « OS ».
+
+### Images des projets
+- **[fourni]** TARDIS : 3 captures (intérieur en couverture, extérieur, portes ouvertes). Portail de la TVA : 1 capture. Textes alternatifs rédigés d'après les images : à relire.
 
 ---
 

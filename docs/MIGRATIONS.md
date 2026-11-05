@@ -139,3 +139,9 @@ authentification ferme alors les sessions ouvertes sur les autres appareils.
 Aucune donnée n'est supprimée et la migration peut être relancée sans risque.
 Tant qu'elle n'est pas faite, le site
 fonctionne normalement, sans cette protection supplémentaire.
+
+### `2026-11-05-statut-projet-futur.sql` : statut « Projet futur »
+
+Pour un site installé avant le 5 novembre 2026 (inutile après une installation
+neuve). Ajoute la valeur « Projet futur » au statut des projets. Aucune donnée
+n'est modifiée et la migration peut être relancée sans risque.

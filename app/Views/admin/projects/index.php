@@ -80,7 +80,7 @@ $newHref = '/admin/projets/nouveau' . ($section !== null ? '?section=' . $sectio
                 </th>
                 <td class="nowrap col-secondary"><?= e((string) $p['section'] === 'game' ? 'Jeux' : 'Technique') ?></td>
                 <td class="small text-soft col-secondary"><?= $catNames !== [] ? e(implode(', ', $catNames)) : '<span class="text-muted">Aucune</span>' ?></td>
-                <td><span class="badge badge--<?= (string) $p['status'] === 'done' ? 'done' : 'progress' ?>"><?= e(status_label((string) $p['status'])) ?></span></td>
+                <td><span class="badge badge--<?= status_badge((string) $p['status']) ?>"><?= e(status_label((string) $p['status'])) ?></span></td>
                 <td>
                     <div class="cluster">
                         <span class="badge badge--<?= $published ? 'published' : 'draft' ?>"><?= $published ? 'Publié' : 'Brouillon' ?></span>

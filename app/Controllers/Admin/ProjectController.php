@@ -28,7 +28,7 @@ final class ProjectController extends AdminController
     public const SECTIONS = ['game' => 'Jeux (Roblox)', 'tech' => 'Projets techniques'];
 
     /** Statuts (valeur => libellé). */
-    public const STATUSES = ['in_progress' => 'En cours', 'done' => 'Terminé'];
+    public const STATUSES = ['in_progress' => 'En cours', 'done' => 'Terminé', 'planned' => 'Projet futur'];
 
     /**
      * Longueur maximale des textes Markdown. Colonne TEXT = 65 535 octets :

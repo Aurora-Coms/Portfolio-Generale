@@ -49,7 +49,7 @@ $titleId = 'projet-' . $slug;
         <h<?= $headingLevel ?> class="project-card__title" id="<?= e($titleId) ?>"><a class="project-card__link" href="/projet/<?= e($slug) ?>"><?= e($title) ?></a></h<?= $headingLevel ?>>
         <p class="project-card__summary"><?= e((string) ($project['summary'] ?? '')) ?></p>
         <div class="project-card__meta">
-            <span class="badge badge--<?= $status === 'done' ? 'done' : 'progress' ?>"><?= e(status_label($status)) ?></span>
+            <span class="badge badge--<?= status_badge($status) ?>"><?= e(status_label($status)) ?></span>
 <?php if ($tags !== []): ?>
             <ul class="tags" aria-label="Technologies">
 <?php foreach ($tags as $tag): ?>

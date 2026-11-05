@@ -41,7 +41,7 @@ $blocks = [
     ['id' => 'titre-apprentissages', 'title' => 'Ce que j\'ai appris', 'text' => (string) ($project['learnings'] ?? '')],
 ];
 $blocks = array_values(array_filter($blocks, static fn (array $b): bool => trim($b['text']) !== ''));
-$badge  = '<span class="badge badge--' . ($status === 'done' ? 'done' : 'progress') . '">' . e(status_label($status)) . '</span>';
+$badge  = '<span class="badge badge--' . status_badge($status) . '">' . e(status_label($status)) . '</span>';
 ?>
 <article aria-labelledby="titre-projet">
     <header class="project-head">

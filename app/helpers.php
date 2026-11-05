@@ -180,7 +180,21 @@ function section_label(string $section): string
 
 function status_label(string $status): string
 {
-    return $status === 'done' ? 'Terminé' : 'En cours';
+    return match ($status) {
+        'done'    => 'Terminé',
+        'planned' => 'Projet futur',
+        default   => 'En cours',
+    };
+}
+
+/** Classe CSS du badge de statut d'un projet (badge--done, badge--progress, badge--planned). */
+function status_badge(string $status): string
+{
+    return match ($status) {
+        'done'    => 'done',
+        'planned' => 'planned',
+        default   => 'progress',
+    };
 }
 
 function timeline_type_label(string $type): string

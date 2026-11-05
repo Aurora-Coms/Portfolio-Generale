@@ -1004,6 +1004,7 @@ a.table__title:hover {
 .badge--draft { color: var(--c-text-muted); background: transparent; border-style: dashed; }
 .badge--featured, .badge--accent, .badge--unread { color: var(--c-accent); background: var(--c-accent-soft); }
 .badge--progress, .badge--warning { color: var(--c-number); background: rgba(245, 166, 107, .12); }
+.badge--planned { color: var(--c-accent); background: var(--c-accent-soft); }
 .badge--error, .badge--danger { color: var(--c-error); background: var(--c-error-soft); }
 
 .tag {
