@@ -181,17 +181,17 @@
     },
     {
       "key": "reel-os",
-      "title": "Décrire le projet « Création d'un réel OS » puis le publier",
+      "title": "Projet futur : « Réalisation d'un système d'exploitation aidé de l'IA »",
       "labels": [
         "contenu",
         "à faire par Alexandre"
       ],
-      "status": "Backlog",
+      "status": "Done",
       "priority": "P1",
       "size": "S",
       "start": "2026-11-06",
       "end": "2026-11-13",
-      "body": "Projet technique créé en brouillon. À préciser : langage (C, assembleur, Rust…), démarrage (QEMU, VirtualBox, clé USB), fonctionnalités déjà en place, captures.",
+      "body": "Publié sur le site comme projet futur (statut « Projet futur »). Le texte de présentation est à relire ; il sera complété quand le projet démarrera (langage, démarrage, fonctionnalités, captures).",
       "issue": 13
     },
     {
@@ -216,12 +216,12 @@
         "contenu",
         "à faire par Alexandre"
       ],
-      "status": "Backlog",
+      "status": "In progress",
       "priority": "P1",
       "size": "M",
       "start": "2026-11-06",
       "end": "2026-11-20",
-      "body": "Administration › Projets › Images (JPEG, PNG ou WebP, 8 Mo max, redimensionnées automatiquement). Vidéos : coller le lien YouTube dans la fiche du projet.",
+      "body": "Fait : 3 captures TARDIS et 1 capture du Portail de la TVA. Reste : Cardverse, OS Fondationnaire et vidéos éventuelles. Administration › Projets › Images (JPEG, PNG ou WebP, 8 Mo max, redimensionnées automatiquement). Vidéos : coller le lien YouTube dans la fiche du projet.",
       "issue": 15
     },
     {
