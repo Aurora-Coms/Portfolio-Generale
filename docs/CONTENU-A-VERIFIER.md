@@ -81,7 +81,7 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 - **[supposé]** Destination : le texte parle d'un « point d'arrivée » sans préciser où mène le portail. À compléter.
 - **[supposé]** Partie « Ce que j'ai appris » (synchronisation, cas limites, performances sur téléphone).
 
-### Cardverse (publié, mis en avant)
+### Cardverse (publié, mis en avant, terminé)
 - **[supposé]** Cartes et factions décrites dans des `ModuleScript` sous forme de tables (nom, faction, rareté, caractéristiques). La notion de **rareté** n'a pas été donnée par Alexandre.
 - **[supposé]** Calcul de l'XP uniquement par le serveur.
 - **[supposé]** Sauvegarde avec `DataStoreService` (à l'arrivée, au départ, à intervalles réguliers), appels protégés par `pcall` avec nouvelles tentatives.

@@ -493,13 +493,13 @@ Les points clés que je retiens :
 Ce sont des réflexes qui me servent directement en BTS CIEL : valider les entrées, limiter les abus et prévoir les erreurs avant qu''elles n''arrivent.',
 NULL, NULL, NULL, 'in_progress', NULL, 1, 1, 2);
 
--- 3. Cardverse (publié, mis en avant)
+-- 3. Cardverse (publié, mis en avant, terminé)
 INSERT INTO projects (id, section, title, slug, summary, context, work_done, learnings,
                       youtube_id, external_url, external_label, status, project_date,
                       is_published, is_featured, position) VALUES
 (3, 'game', 'Cardverse', 'cardverse',
 'Jeu de cartes à collectionner sur Roblox : factions, progression par l''expérience (XP), saisons et classements des joueurs, avec sauvegarde des données et une logique de jeu contrôlée par le serveur.',
-'Cardverse est un jeu de cartes à collectionner que je développe sur Roblox Studio. Le joueur rassemble des cartes, les organise selon leur **faction**, gagne de l''**expérience (XP)** pour progresser et se mesure aux autres dans des **classements** renouvelés à chaque **saison**.
+'Cardverse est un jeu de cartes à collectionner que j''ai développé sur Roblox Studio. Le joueur rassemble des cartes, les organise selon leur **faction**, gagne de l''**expérience (XP)** pour progresser et se mesure aux autres dans des **classements** renouvelés à chaque **saison**.
 
 C''est mon projet le plus orienté « systèmes » : il y a moins d''effets visuels que dans le TARDIS ou le Portail de la TVA, mais beaucoup plus de données à gérer et à protéger. Un jeu de collection n''a d''intérêt que si la progression est fiable : un joueur ne doit ni perdre ses cartes, ni pouvoir s''en attribuer en trichant.
 
@@ -545,7 +545,7 @@ Ce que je retiens :
 - **Une interface adaptative** : un même écran doit rester utilisable sur un grand moniteur comme sur un téléphone.
 
 Ces notions (données structurées, sauvegarde, contrôle des accès, validation des entrées) sont exactement celles que je retrouve en BTS, côté réseaux comme côté développement. Cardverse est aussi le projet sur lequel j''ai le plus appris à corriger et améliorer un code existant plutôt qu''à tout réécrire.',
-NULL, NULL, NULL, 'in_progress', NULL, 1, 1, 3);
+NULL, NULL, NULL, 'done', NULL, 1, 1, 3);
 
 -- 4. OS Fondationnaire (BROUILLON : description à rédiger par Alexandre)
 INSERT INTO projects (id, section, title, slug, summary, context, work_done, learnings,
