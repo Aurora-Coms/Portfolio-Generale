@@ -1,0 +1,131 @@
+# =============================================================================
+#  Publication de la version vitrine (statique) sur GitHub Pages
+# =============================================================================
+#  À chaque push sur main : le site PHP est lancé avec une base MySQL jetable
+#  (database.sql), chaque page publique est enregistrée en HTML
+#  (scripts/build-static.sh), puis le résultat est publié sur GitHub Pages.
+#  GitHub Pages n'exécute pas PHP : l'administration, le formulaire de contact
+#  et le CV n'existent que dans la version hébergée (Hostinger).
+# =============================================================================
+name: Publier le site (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write      # publier sur GitHub Pages
+  id-token: write   # authentifier le déploiement
+
+# Une seule publication à la fois ; on ne coupe pas une publication en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construire:
+    name: Construire le site statique
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Base jetable, détruite avec la machine : ces identifiants ne protègent rien.
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+          MYSQL_DATABASE: portfolio_pages
+          MYSQL_USER: portfolio_pages
+          MYSQL_PASSWORD: pages-pass
+        ports:
+          - 3306/tcp
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Installation de PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, gd, intl, mbstring, fileinfo, exif, openssl
+          coverage: none
+          tools: none
+
+      - name: Paramètres GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Configuration (app/config.php jetable, mode statique)
+        env:
+          DB_PORT: ${{ job.services.db.ports['3306'] }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          cnf="$RUNNER_TEMP/mysql.cnf"
+          (umask 077 && printf '[client]\nhost=127.0.0.1\nport=%s\nuser=portfolio_pages\npassword=pages-pass\n' "$DB_PORT" > "$cnf")
+          echo "MYSQL_CNF=$cnf" >> "$GITHUB_ENV"
+          APP_KEY="$(php -r 'echo bin2hex(random_bytes(32));')"
+          echo "::add-mask::$APP_KEY"
+          export APP_KEY
+          # shellcheck disable=SC2016  # code PHP entre apostrophes : pas d'expansion voulue
+          php -r '
+            $c = require "app/config.example.php";
+            $c["env"] = "production";
+            $c["static_site"] = true;
+            $c["base_url"] = rtrim(getenv("BASE_URL"), "/");
+            $c["db"] = array_replace($c["db"], [
+                "host" => "127.0.0.1", "port" => (int) getenv("DB_PORT"),
+                "name" => "portfolio_pages", "user" => "portfolio_pages", "pass" => "pages-pass",
+            ]);
+            $c["mail"]["transport"] = "none";
+            $c["security"]["app_key"] = getenv("APP_KEY");
+            $c["security"]["setup_token"] = "";
+            file_put_contents("app/config.php", "<?php\nreturn " . var_export($c, true) . ";\n");
+          '
+          mkdir -p app/storage/logs app/storage/sessions app/storage/cv
+
+      - name: Import de la base (database.sql)
+        run: |
+          mysql --defaults-extra-file="$MYSQL_CNF" portfolio_pages < database.sql
+          # Hébergeur affiché dans les mentions légales de cette version.
+          mysql --defaults-extra-file="$MYSQL_CNF" portfolio_pages -e "
+            UPDATE settings SET setting_value = 'GitHub, Inc. (GitHub Pages)\n88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis\nhttps://pages.github.com'
+            WHERE setting_key = 'legal_host';"
+
+      - name: Export statique
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: bash scripts/build-static.sh _site "$BASE_PATH"
+
+      - name: Aucune erreur PHP journalisée
+        run: |
+          journal=app/storage/logs/php-errors.log
+          if [ -s "$journal" ]; then
+            echo "::error title=Journal PHP::Erreurs pendant l'export"
+            cat "$journal"
+            exit 1
+          fi
+
+      - name: Envoi du site à GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publier:
+    name: Publier
+    needs: construire
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - name: Publication
+        id: deploiement
+        uses: actions/deploy-pages@v4

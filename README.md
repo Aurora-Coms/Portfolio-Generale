@@ -17,6 +17,7 @@ dans [`docs/SECURITE.md`](docs/SECURITE.md).
 2. [Arborescence](#2-arborescence)
 3. [Prérequis](#3-prérequis)
 4. [Mise en ligne sur Hostinger, pas à pas](#4-mise-en-ligne-sur-hostinger-pas-à-pas)
+   - [Version vitrine sur GitHub Pages](#4-bis-version-vitrine-sur-github-pages-gratuite)
 5. [Mettre le lien sur LinkedIn](#5-mettre-le-lien-sur-linkedin)
 6. [Utiliser l'administration](#6-utiliser-ladministration)
 7. [Développement en local](#7-développement-en-local)
@@ -405,6 +406,29 @@ ouvertes sont fermées.
 - [ ] Le CV se télécharge depuis `/cv`.
 
 ---
+
+## 4 bis. Version vitrine sur GitHub Pages (gratuite)
+
+En attendant l'hébergement Hostinger, le site public peut être publié
+gratuitement par **GitHub Pages** : https://aurora-coms.github.io/Portfolio-Generale/
+
+GitHub Pages n'exécute pas PHP : l'Action `.github/workflows/pages.yml` lance donc le
+site avec une base jetable (`database.sql`), enregistre chaque page publique en HTML
+(`scripts/build-static.sh`) et publie le résultat à chaque push sur `main`.
+
+| Fonctionne | N'existe pas dans cette version |
+|---|---|
+| Accueil, projets (filtres, galerie, vidéos), parcours, compétences, à propos, mentions légales | Administration, formulaire de contact (remplacé par les liens LinkedIn / GitHub), téléchargement du CV |
+
+**Activation (une seule fois)** : sur GitHub, **Settings › Pages › Build and
+deployment › Source : GitHub Actions**, puis onglet **Actions** › « Publier le site
+(GitHub Pages) » › **Run workflow**.
+
+**Modifier le contenu** de cette version : il provient de `database.sql`
+(paramètres, projets, parcours, compétences). Modifiez-le puis poussez sur `main`.
+
+Sécurité : GitHub Pages ne permet pas d'en-têtes HTTP personnalisés ; la politique de
+sécurité du contenu (CSP) est donc fournie par une balise `<meta>` dans chaque page.
 
 ## 5. Mettre le lien sur LinkedIn
 

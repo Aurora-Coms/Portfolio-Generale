@@ -85,6 +85,11 @@ $bodyClass = isset($bodyClass) && is_string($bodyClass) ? trim($bodyClass) : '';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<?php if (static_site()): ?>
+    <?php /* Hébergement statique (GitHub Pages) : pas d'en-têtes HTTP personnalisables, la CSP passe par une balise meta. */ ?>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+<?php endif; ?>
     <title><?= e($fullTitle) ?></title>
     <meta name="description" content="<?= e($description) ?>">
 <?php if ($robots !== ''): ?>

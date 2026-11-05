@@ -85,6 +85,13 @@ $toc = [
 
         <section class="legal__section" id="donnees" aria-labelledby="titre-donnees">
             <h2 class="content-block__title" id="titre-donnees">Données personnelles</h2>
+<?php if (static_site()): ?>
+            <div class="prose">
+                <p>Le responsable du traitement est <?= e($publisher) ?>. Cette version du site est entièrement statique : elle ne contient <strong>aucun formulaire</strong> et ne collecte aucune donnée personnelle.</p>
+                <p>L'hébergeur (GitHub Pages) enregistre l'adresse IP des visiteurs dans ses journaux techniques, pour la sécurité de son service, conformément à sa propre politique de confidentialité : <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener noreferrer">déclaration de confidentialité de GitHub</a>.</p>
+                <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL : <a href="https://www.cnil.fr" rel="noopener noreferrer">www.cnil.fr</a>.</p>
+            </div>
+<?php else: ?>
             <div class="prose">
                 <p>Le responsable du traitement est <?= e($publisher) ?>. Le site ne collecte des données personnelles que lorsque vous envoyez un message avec le <a href="/contact">formulaire de contact</a>.</p>
                 <ul>
@@ -99,6 +106,7 @@ $toc = [
                 <p>Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur vos données. Pour l'exercer, écrivez-moi par le <a href="/contact">formulaire de contact</a> en précisant votre demande.</p>
                 <p>Si vous estimez, après m'avoir contacté, que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL : <a href="https://www.cnil.fr" rel="noopener noreferrer">www.cnil.fr</a>.</p>
             </div>
+<?php endif; ?>
         </section>
 
         <section class="legal__section" id="cookies" aria-labelledby="titre-cookies">
@@ -106,7 +114,11 @@ $toc = [
             <div class="prose">
                 <ul>
                     <li><strong>Aucun traceur</strong> : ce site n'utilise ni cookie publicitaire, ni outil de mesure d'audience, ni bouton de réseau social.</li>
+<?php if (static_site()): ?>
+                    <li><strong>Aucun cookie</strong> n'est déposé par cette version statique du site.</li>
+<?php else: ?>
                     <li><strong>Un cookie de session technique</strong>, strictement nécessaire, est déposé uniquement lorsque vous ouvrez le formulaire de contact ou l'administration. Il sert à protéger l'envoi du formulaire contre les requêtes frauduleuses. Il est supprimé à la fermeture du navigateur et, étant indispensable au service demandé, il ne nécessite pas de consentement.</li>
+<?php endif; ?>
                     <li><strong>Vidéos YouTube</strong> : elles ne sont chargées qu'après un clic sur le bouton de lecture, depuis le domaine youtube-nocookie.com. Avant ce clic, aucune donnée n'est envoyée à YouTube. Après, YouTube (Google) applique sa propre politique de confidentialité.</li>
                 </ul>
             </div>
@@ -116,6 +128,14 @@ $toc = [
             <h2 class="content-block__title" id="titre-securite">Sécurité</h2>
             <div class="prose">
                 <p>Étudiant en cybersécurité, j'applique à ce site les bonnes pratiques que j'apprends :</p>
+<?php if (static_site()): ?>
+                <ul>
+                    <li>connexion chiffrée en HTTPS ;</li>
+                    <li>politique de sécurité du contenu (CSP) stricte : aucun script externe, aucune ressource tierce chargée sans action de votre part ;</li>
+                    <li>aucun formulaire, aucun cookie, aucune donnée collectée par cette version statique.</li>
+                </ul>
+                <p>La version complète du site (PHP et MySQL : formulaire protégé contre les requêtes falsifiées et le spam, administration avec double authentification, requêtes préparées) est publiée en code source ouvert : <a href="https://github.com/Aurora-Coms/Portfolio-Generale" rel="noopener noreferrer">dépôt GitHub du portfolio</a>, avec le détail de chaque mesure de sécurité.</p>
+<?php else: ?>
                 <ul>
                     <li>connexion chiffrée en HTTPS, imposée par le navigateur (HSTS) ;</li>
                     <li>politique de sécurité du contenu (CSP) stricte : aucun script externe, aucune ressource tierce chargée sans action de votre part ;</li>
@@ -123,6 +143,7 @@ $toc = [
                     <li>requêtes préparées pour la base de données et échappement de tout contenu affiché ;</li>
                     <li>administration protégée par un mot de passe haché et une double authentification.</li>
                 </ul>
+<?php endif; ?>
                 <p>Vous pensez avoir trouvé une faille ? Merci de me la signaler de façon responsable par le <a href="/contact">formulaire de contact</a>, sans l'exploiter ni la divulguer.</p>
             </div>
         </section>

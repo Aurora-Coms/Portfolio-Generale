@@ -37,11 +37,25 @@ $fieldErrors = array_diff_key($errors, ['_form' => true]);
 <?= partial('site/page-header', [
     'comment' => '-- contact.sh',
     'title'   => 'Contact',
-    'lead'    => 'Une proposition de stage, une question sur un projet ou sur mon parcours : écrivez-moi avec ce formulaire.',
+    'lead'    => static_site()
+        ? 'Une proposition de stage, une question sur un projet ou sur mon parcours : contactez-moi via les liens ci-dessous.'
+        : 'Une proposition de stage, une question sur un projet ou sur mon parcours : écrivez-moi avec ce formulaire.',
 ]) ?>
 
 <div class="detail-layout">
     <div class="detail-main">
+<?php if (static_site()): ?>
+        <section class="card card--pad stack" aria-labelledby="titre-formulaire">
+            <h2 class="card__title" id="titre-formulaire">Me contacter</h2>
+            <p>Le formulaire de contact sera disponible sur la version hébergée du site. En attendant, le plus simple est de m'écrire sur LinkedIn.</p>
+<?php if ($linkedin !== ''): ?>
+            <p><a class="btn btn--primary" href="<?= e($linkedin) ?>" rel="noopener noreferrer"><?= icon('linkedin') ?>M'écrire sur LinkedIn</a></p>
+<?php endif; ?>
+<?php if ($github !== ''): ?>
+            <p><a class="btn btn--secondary" href="<?= e($github) ?>" rel="noopener noreferrer"><?= icon('github') ?>Voir mon GitHub</a></p>
+<?php endif; ?>
+        </section>
+<?php else: ?>
         <form class="form card card--pad" method="post" action="/contact" novalidate data-focus-error aria-labelledby="titre-formulaire">
             <h2 class="card__title" id="titre-formulaire">Envoyer un message</h2>
             <?= csrf_field() ?>
@@ -110,6 +124,7 @@ $fieldErrors = array_diff_key($errors, ['_form' => true]);
             </div>
             <p class="form__note">Vos données (nom, e-mail, sujet, message) servent uniquement à vous répondre. Elles ne sont ni cédées ni revendues et sont supprimées automatiquement au bout de 12 mois. <a href="/mentions-legales#donnees">En savoir plus</a></p>
         </form>
+<?php endif; ?>
     </div>
 
     <aside class="detail-aside card card--pad stack" aria-labelledby="titre-infos-contact">

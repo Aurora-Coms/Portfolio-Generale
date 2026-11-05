@@ -65,7 +65,9 @@ $tabs = [
 <?php if ($links['github'] !== ''): ?>
                 <li><a class="menu-panel__link" href="<?= e($links['github']) ?>" rel="noopener noreferrer"><?= icon('github') ?>GitHub</a></li>
 <?php endif; ?>
+<?php if (App\Core\PdfUpload::exists()): ?>
                 <li><a class="menu-panel__link" href="/cv"><?= icon('download') ?>CV (PDF)</a></li>
+<?php endif; ?>
             </ul>
         </nav>
     </div>

@@ -54,6 +54,15 @@ function upload_url(string $filename): string
     return '/uploads/projects/' . rawurlencode($filename);
 }
 
+/**
+ * Mode « site statique » (export HTML pour GitHub Pages, sans PHP en ligne) :
+ * le formulaire de contact, le CV et l'administration n'existent pas.
+ */
+function static_site(): bool
+{
+    return Config::get('static_site') === true;
+}
+
 /** Valeur d'un réglage du site. */
 function setting(string $key, string $default = ''): string
 {

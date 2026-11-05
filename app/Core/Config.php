@@ -29,7 +29,8 @@ final class Config
             self::fail("security.app_key doit contenir 64 caractères hexadécimaux.");
         }
         $baseUrl = (string) self::get('base_url', '');
-        if (!preg_match('#^https?://[^/\s]+$#', $baseUrl)) {
+        // Un sous-chemin est permis (site de projet GitHub Pages : https://compte.github.io/Depot).
+        if (!preg_match('#^https?://[^/\s]+(?:/[A-Za-z0-9._~-]+)*$#', $baseUrl)) {
             self::fail("base_url doit ressembler à https://www.votre-domaine.fr (sans / final).");
         }
     }

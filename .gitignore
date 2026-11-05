@@ -8,3 +8,5 @@
 !**/.gitkeep
 !**/.htaccess
 /dist/
+# Export statique (GitHub Pages)
+/_site/

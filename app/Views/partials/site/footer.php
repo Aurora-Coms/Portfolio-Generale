@@ -51,7 +51,9 @@ if (setting('banner_enabled') === '1') {
 <?php if ($links['github'] !== ''): ?>
                 <li><a href="<?= e($links['github']) ?>" rel="noopener noreferrer">GitHub</a></li>
 <?php endif; ?>
+<?php if (App\Core\PdfUpload::exists()): ?>
                 <li><a href="/cv">CV</a></li>
+<?php endif; ?>
                 <li><a href="/mentions-legales">Mentions légales</a></li>
             </ul>
         </nav>
