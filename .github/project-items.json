@@ -31,7 +31,7 @@
       "size": "M",
       "start": "2026-11-03",
       "end": "2026-11-04",
-      "body": "Fichier `database.sql` importable dans phpMyAdmin : projets, catégories (N-N), tags (N-N), images, parcours, compétences, centres d'intérêt, messages, réglages, admin, codes de secours, limitation des tentatives.\n\n- [x] Schéma\n- [ ] Données de départ (TARDIS, Portail de la TVA, Cardverse, OS Fondationnaire en brouillon, parcours, compétences)\n- [ ] Modèles PHP testés (`tests/models-test.php`)",
+      "body": "Fichier `database.sql` importable dans phpMyAdmin : projets, catégories (N-N), tags (N-N), images, parcours, compétences, centres d'intérêt, messages, réglages, admin, codes de secours, limitation des tentatives.\n\n- [x] Schéma\n- [ ] Données de départ (TARDIS, Portail du TVA, Cardverse, OS Fondationnaire en brouillon, parcours, compétences)\n- [ ] Modèles PHP testés (`tests/models-test.php`)",
       "issue": 2
     },
     {
@@ -221,7 +221,7 @@
       "size": "M",
       "start": "2026-11-06",
       "end": "2026-11-20",
-      "body": "Fait : 3 captures TARDIS et 1 capture du Portail de la TVA. Reste : Cardverse, OS Fondationnaire et vidéos éventuelles. Administration › Projets › Images (JPEG, PNG ou WebP, 8 Mo max, redimensionnées automatiquement). Vidéos : coller le lien YouTube dans la fiche du projet.",
+      "body": "Fait : 3 captures TARDIS et 1 capture du Portail du TVA. Reste : Cardverse, OS Fondationnaire et vidéos éventuelles. Administration › Projets › Images (JPEG, PNG ou WebP, 8 Mo max, redimensionnées automatiquement). Vidéos : coller le lien YouTube dans la fiche du projet.",
       "issue": 15
     },
     {

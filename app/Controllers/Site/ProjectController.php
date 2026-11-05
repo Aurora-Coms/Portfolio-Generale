@@ -20,7 +20,7 @@ final class ProjectController extends SiteController
             'title'       => 'Projets de jeux',
             'comment'     => '-- projets/jeux/',
             'lead'        => 'Jeux développés sur Roblox Studio, entièrement scriptés en Lua, objets compris : mécaniques, interfaces, sauvegarde des données et validation côté serveur.',
-            'description' => 'Jeux Roblox d\'Alexandre Derbez, entièrement scriptés en Lua : TARDIS, Portail de la TVA, Cardverse. Logique client / serveur, sauvegarde et interfaces.',
+            'description' => 'Jeux Roblox d\'Alexandre Derbez, entièrement scriptés en Lua : TARDIS, Portail du TVA, Cardverse. Logique client / serveur, sauvegarde et interfaces.',
             'allLabel'    => '*.lua',
             'switch'      => 'jeux/',
         ],

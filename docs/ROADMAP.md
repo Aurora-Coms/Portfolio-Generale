@@ -33,7 +33,7 @@ Tout ce qui a été rédigé sans information précise est listé dans
 [`CONTENU-A-VERIFIER.md`](CONTENU-A-VERIFIER.md) et se corrige depuis `/admin`.
 
 - [ ] Relire le texte « À propos », l'accroche de l'accueil et la description pour Google (#11)
-- [ ] Vérifier les descriptions techniques de TARDIS, Portail de la TVA et Cardverse (#11)
+- [ ] Vérifier les descriptions techniques de TARDIS, Portail du TVA et Cardverse (#11)
 - [x] Niveaux des compétences confirmés par Alexandre (thèmes > sous-catégories, 43 compétences) (#11)
 - [ ] Relire les descriptions des compétences (voir [`CONTENU-A-VERIFIER.md`](CONTENU-A-VERIFIER.md), section 6) (#11)
 - [ ] Décrire le projet « OS Fondationnaire » puis cocher **Publié** (#12)

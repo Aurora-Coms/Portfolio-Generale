@@ -1,6 +1,6 @@
 <?php
 /**
- * Génération de « slugs » pour les URL : « Portail de la TVA » => « portail-de-la-tva ».
+ * Génération de « slugs » pour les URL : « Portail du TVA » => « portail-du-tva ».
  */
 
 declare(strict_types=1);

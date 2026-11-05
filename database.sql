@@ -396,7 +396,7 @@ INSERT INTO tags (id, name, slug) VALUES
 
 -- -----------------------------------------------------------------------------
 --  Projets de jeux (section game)
---    1 TARDIS · 2 Portail de la TVA · 3 Cardverse · 4 OS Fondationnaire (brouillon)
+--    1 TARDIS · 2 Portail du TVA · 3 Cardverse · 4 OS Fondationnaire (brouillon)
 -- -----------------------------------------------------------------------------
 
 -- 1. TARDIS (publié, mis en avant)
@@ -447,13 +447,13 @@ Ce que je retiens en particulier :
 Si je devais recommencer, je commenterais davantage mon code dès le départ et je découperais encore plus les modules, afin de pouvoir réutiliser la console et la machine à états dans d''autres projets. J''ai aussi compris qu''un projet ambitieux se construit par étapes : d''abord une version simple qui fonctionne, ensuite les effets et les finitions.',
 NULL, NULL, NULL, 'in_progress', NULL, 1, 1, 1);
 
--- 2. Portail de la TVA (publié, mis en avant)
+-- 2. Portail du TVA (publié, mis en avant)
 INSERT INTO projects (id, section, title, slug, summary, context, work_done, learnings,
                       youtube_id, external_url, external_label, status, project_date,
                       is_published, is_featured, position) VALUES
-(2, 'game', 'Portail de la TVA', 'portail-de-la-tva',
-'Portail temporel inspiré de la Time Variance Authority de la série Loki : ouverture animée du portail, effets visuels synchronisés pour tous les joueurs et téléportation fiable, entièrement scripté en Lua.',
-'Dans la série *Loki*, la Time Variance Authority (TVA) utilise des portails temporels pour se déplacer d''une époque à l''autre : une porte lumineuse s''ouvre, les agents la traversent et réapparaissent ailleurs. J''ai voulu reproduire ce portail dans Roblox Studio, avec une ouverture spectaculaire et une téléportation fiable des joueurs.
+(2, 'game', 'Portail du TVA', 'portail-du-tva',
+'Portail temporel inspiré du TVA de la série Loki : ouverture animée du portail, effets visuels synchronisés pour tous les joueurs et téléportation fiable, entièrement scripté en Lua.',
+'Dans la série *Loki*, le TVA (Tribunal des Variations Anachroniques, *Time Variance Authority* en version originale) utilise des portails temporels pour se déplacer d''une époque à l''autre : une porte lumineuse s''ouvre, les agents la traversent et réapparaissent ailleurs. J''ai voulu reproduire ce portail dans Roblox Studio, avec une ouverture spectaculaire et une téléportation fiable des joueurs.
 
 Comme le TARDIS, c''est un projet autour du voyage dans le temps, mais l''objectif est différent : ici, on ne pilote pas un véhicule, on ouvre un passage que les joueurs franchissent. Les difficultés principales étaient :
 
@@ -501,7 +501,7 @@ INSERT INTO projects (id, section, title, slug, summary, context, work_done, lea
 'Jeu de cartes à collectionner sur Roblox : factions, progression par l''expérience (XP), saisons et classements des joueurs, avec sauvegarde des données et une logique de jeu contrôlée par le serveur.',
 'Cardverse est un jeu de cartes à collectionner que j''ai développé sur Roblox Studio. Le joueur rassemble des cartes, les organise selon leur **faction**, gagne de l''**expérience (XP)** pour progresser et se mesure aux autres dans des **classements** renouvelés à chaque **saison**.
 
-C''est mon projet le plus orienté « systèmes » : il y a moins d''effets visuels que dans le TARDIS ou le Portail de la TVA, mais beaucoup plus de données à gérer et à protéger. Un jeu de collection n''a d''intérêt que si la progression est fiable : un joueur ne doit ni perdre ses cartes, ni pouvoir s''en attribuer en trichant.
+C''est mon projet le plus orienté « systèmes » : il y a moins d''effets visuels que dans le TARDIS ou le Portail du TVA, mais beaucoup plus de données à gérer et à protéger. Un jeu de collection n''a d''intérêt que si la progression est fiable : un joueur ne doit ni perdre ses cartes, ni pouvoir s''en attribuer en trichant.
 
 Les objectifs que je me suis fixés :
 
@@ -599,7 +599,7 @@ SELECT p.id, c.id
 FROM projects p
 JOIN categories c ON c.section = p.section
 WHERE (p.slug = 'tardis'                AND c.slug IN ('roblox', 'sci-fi-temporel'))
-   OR (p.slug = 'portail-de-la-tva'     AND c.slug IN ('roblox', 'sci-fi-temporel'))
+   OR (p.slug = 'portail-du-tva'     AND c.slug IN ('roblox', 'sci-fi-temporel'))
    OR (p.slug = 'cardverse'             AND c.slug IN ('roblox', 'systemes-de-jeu'))
    OR (p.slug = 'os-fondationnaire'     AND c.slug IN ('roblox', 'systemes-de-jeu'))
    OR (p.slug = 'systeme-d-exploitation-aide-de-l-ia' AND c.slug IN ('systemes'));
@@ -612,7 +612,7 @@ SELECT p.id, t.id
 FROM projects p
 CROSS JOIN tags t
 WHERE (p.slug = 'tardis'                AND t.slug IN ('lua', 'luau', 'roblox-studio', 'remoteevents', 'modulescripts', 'tweenservice', 'interface-ui'))
-   OR (p.slug = 'portail-de-la-tva'     AND t.slug IN ('lua', 'luau', 'roblox-studio', 'remoteevents', 'tweenservice'))
+   OR (p.slug = 'portail-du-tva'     AND t.slug IN ('lua', 'luau', 'roblox-studio', 'remoteevents', 'tweenservice'))
    OR (p.slug = 'cardverse'             AND t.slug IN ('lua', 'luau', 'roblox-studio', 'datastore', 'remoteevents', 'modulescripts', 'interface-ui'))
    OR (p.slug = 'os-fondationnaire'     AND t.slug IN ('lua', 'roblox-studio', 'os'))
    OR (p.slug = 'systeme-d-exploitation-aide-de-l-ia' AND t.slug IN ('os'));
@@ -630,7 +630,11 @@ INSERT INTO project_images (project_id, filename, thumb_filename, alt_text, widt
 (1, 'da3e3b88d00ca7494bbf36b31e32b1ae.webp', 'da3e3b88d00ca7494bbf36b31e32b1ae-thumb.webp',
  'TARDIS portes ouvertes : l''intérieur, bien plus grand que la cabine, est visible depuis l''extérieur.', 310, 370, 2),
 (2, '3f089788eb3e710280ef279eb4d5d1bf.webp', '3f089788eb3e710280ef279eb4d5d1bf-thumb.webp',
- 'Portail temporel de la TVA : cadre lumineux blanc, jaune et orange entouré d''un halo, posé sur la carte.', 248, 299, 0);
+ 'Portail temporel du TVA : cadre lumineux blanc, jaune et orange entouré d''un halo, posé sur la carte.', 248, 299, 0),
+(3, '1f79b5b34eace86077cd030b9e5ec1da.webp', '1f79b5b34eace86077cd030b9e5ec1da-thumb.webp',
+ 'Illustration de Cardverse : trois cartes de factions différentes en éventail, le classement de la saison et une barre d''expérience.', 1600, 900, 0),
+(5, '8619459bbe648835b025cd18804cce77.webp', '8619459bbe648835b025cd18804cce77-thumb.webp',
+ 'Illustration : démarrage d''un système d''exploitation dans un terminal, architecture en couches jusqu''au noyau et bulle « assistant IA ».', 1600, 900, 0);
 
 -- -----------------------------------------------------------------------------
 --  Parcours (timeline). Affichage par date de début décroissante, puis position.
@@ -643,26 +647,46 @@ INSERT INTO timeline_entries (id, type, title, organization, location, start_dat
 
 Au programme : réseaux (adressage, commutation, routage), cybersécurité, administration de systèmes Windows et Linux, électronique et développement.',
  1, 0),
-(2, 'internship', '6 stages en maintenance informatique',
- 'La Salle Avignon · Cité scolaire Frédéric Mistral · CNRS LNC Marseille', 'Avignon et Marseille',
- '2022-09-01', '2025-06-30', 'year',
-'Six stages réalisés pendant le Bac Pro, dans des établissements scolaires et un laboratoire du CNRS. Missions types de maintenance informatique :
+(2, 'internship', 'Stage en maintenance informatique',
+ 'Ensemble scolaire St Jean-Baptiste de La Salle · service technique et sécurité', 'Avignon',
+ '2023-06-05', '2023-06-23', 'month',
+'Stage de 2de Bac Pro au service technique et sécurité de l''établissement, qui gère le parc informatique de ses trois sites à Avignon.
+
+- **Réseau** : remplacement de câbles existants et fabrication de 5 câbles réseau complets, de la prise murale jusqu''aux 4 ordinateurs du foyer et à l''imprimante ; connexion des appareils aux bornes Wi-Fi de l''établissement.
+- **Réinstallation de postes** : enregistrement des ordinateurs dans le logiciel de déploiement **FOG**, réinstallation à partir d''une image de sauvegarde, puis réintégration des postes au domaine.
+- **Matériel** : remplacement de souris défectueuses, changement des cartouches d''encre d''une imprimante, pose de coques de protection sur des iPad et connexion de ces tablettes au Wi-Fi.
+- **Dépannage** des ordinateurs du foyer et **mise à jour des logiciels**.',
+ 1, 2),
+(3, 'education', 'Bac Pro SN option RISC', 'Campus St Jean-Baptiste de La Salle', 'Avignon',
+ '2022-09-01', '2025-07-04', 'year',
+'Baccalauréat professionnel Systèmes Numériques, option Réseaux Informatiques et Systèmes Communicants (RISC). Diplôme obtenu.
+
+Formation centrée sur l''installation, la mise en service et la maintenance des équipements informatiques et réseaux.',
+ 1, 4),
+(4, 'internship', 'Stage en maintenance informatique',
+ 'CNRS · Laboratoire de Neurosciences Cognitives (LNC)', 'Marseille',
+ '2023-02-27', '2023-03-17', 'month',
+'Stage de 2de Bac Pro dans un laboratoire de recherche du CNRS.
+
+- **Maintenance informatique** : câblage des postes de travail et de leurs périphériques.
+- **Imprimantes** : installation et calibrage des imprimantes avec les ordinateurs.
+- **Logiciels** : mise à jour des logiciels des postes.
+- **Devis** : préparation d''un devis pour l''assemblage d''un ordinateur (choix et chiffrage des composants).
+
+J''y ai découvert l''informatique au service de la recherche : au laboratoire, un programme développé sous MATLAB, couplé à un logiciel d''acquisition, permet de lire l''électroencéphalogramme (EEG) d''une personne.',
+ 1, 3),
+(5, 'internship', '4 autres stages en maintenance informatique',
+ 'La Salle Avignon · Cité scolaire Frédéric Mistral', 'Avignon',
+ '2024-01-29', '2025-06-30', 'year',
+'Stages réalisés en 1re et en terminale Bac Pro, dans des établissements scolaires d''Avignon. Missions types :
 
 - diagnostic et dépannage de postes de travail (matériel et logiciel) ;
 - remplacement de composants : disque, mémoire, alimentation ;
 - installation et configuration de Windows et des logiciels ;
 - préparation et mise en service de postes pour les utilisateurs ;
 - vérification du câblage et du raccordement au réseau ;
-- assistance aux utilisateurs et suivi des interventions.
-
-Le détail des missions de chaque stage est à compléter.',
- 1, 1),
-(3, 'education', 'Bac Pro SN option RISC', 'Campus St Jean-Baptiste de La Salle', 'Avignon',
- '2022-09-01', '2025-07-04', 'year',
-'Baccalauréat professionnel Systèmes Numériques, option Réseaux Informatiques et Systèmes Communicants (RISC). Diplôme obtenu.
-
-Formation centrée sur l''installation, la mise en service et la maintenance des équipements informatiques et réseaux.',
- 1, 2);
+- assistance aux utilisateurs et suivi des interventions.',
+ 1, 1);
 
 -- -----------------------------------------------------------------------------
 --  Compétences : thèmes > sous-catégories > compétences.

@@ -52,7 +52,7 @@ check('Markdown : lien interne sans rel', Markdown::render('[ok](/contact)') ===
 check('Markdown : lien avec tabulation refusé', !str_contains(Markdown::render("[x](/\t/evil.com)"), 'href'));
 
 // --- Slug --------------------------------------------------------------------
-check('Slug accents', Slug::make('Portail de la TVA') === 'portail-de-la-tva');
+check('Slug accents', Slug::make('Portail du TVA') === 'portail-du-tva');
 check('Slug spéciaux', Slug::make('  Sci-fi & temporel !! ') === 'sci-fi-temporel');
 check('Slug é è ç', Slug::make('Création d\'un réel OS') === 'creation-d-un-reel-os');
 

@@ -41,7 +41,7 @@ renseigner obligatoirement.
 - Tags C et Assembleur **non créés** : le langage de « Création d'un réel OS » n'est pas connu. Les ajouter (avec Rust ou autre) une fois le projet décrit.
 - **[supposé]** Liaisons projets ↔ tags :
   - TARDIS : Lua, Luau, Roblox Studio, RemoteEvents, ModuleScripts, TweenService, Interface (UI)
-  - Portail de la TVA : Lua, Luau, Roblox Studio, RemoteEvents, TweenService
+  - Portail du TVA : Lua, Luau, Roblox Studio, RemoteEvents, TweenService
   - Cardverse : Lua, Luau, Roblox Studio, DataStore, RemoteEvents, ModuleScripts, Interface (UI)
   - OS Fondationnaire : Lua, Roblox Studio, OS
   - Création d'un réel OS : OS
@@ -72,7 +72,7 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 - **[supposé]** Utilisation par plusieurs joueurs en même temps.
 - **[supposé]** Toute la partie « Ce que j'ai appris », dont « Si je devais recommencer, je commenterais davantage mon code… ».
 
-### Portail de la TVA (publié, mis en avant)
+### Portail du TVA (publié, mis en avant)
 - **[supposé]** Ouverture en trois étapes (point lumineux, agrandissement, stabilisation) avec `TweenService`, `ParticleEmitter`, `PointLight` et sons.
 - **[supposé]** Ouverture déclenchée depuis « un objet ou une commande prévus pour cela » : préciser lequel.
 - **[supposé]** Vérifications serveur : droit d'ouvrir, proximité, délai minimum entre deux ouvertures, un seul portail ouvert à la fois.
@@ -109,7 +109,8 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 - **[supposé]** Rangé dans la catégorie Systèmes, tag « OS ».
 
 ### Images des projets
-- **[fourni]** TARDIS : 3 captures (intérieur en couverture, extérieur, portes ouvertes). Portail de la TVA : 1 capture. Textes alternatifs rédigés d'après les images : à relire.
+- **[fourni]** TARDIS : 3 captures (intérieur en couverture, extérieur, portes ouvertes). Portail du TVA : 1 capture. Textes alternatifs rédigés d'après les images : à relire.
+- **[rédigé]** Cardverse et « Réalisation d'un système d'exploitation aidé de l'IA » : **illustrations** dessinées pour le site (ce ne sont pas des captures du jeu ni de l'OS). Les valeurs affichées (coûts, points, classement, niveau 12) sont décoratives. À remplacer par de vraies captures quand elles existent (Administration > Projets > Images).
 
 ---
 
@@ -119,11 +120,13 @@ la confronter à ton code réel et supprimer ce qui ne correspond pas.
 - **[supposé]** Date de début : 1er septembre 2025 (affichée « 2025 »).
 - **[supposé]** Matières citées : réseaux (adressage, commutation, routage), cybersécurité, administration Windows et Linux, électronique, développement.
 
-### 6 stages en maintenance informatique
-- **[supposé]** Période : septembre 2022 à juin 2025 (affichée « 2022 → 2025 »). Les dates réelles de chaque stage ne sont pas connues.
-- **[supposé]** Les six missions listées sont des **missions types** de maintenance (diagnostic, remplacement de composants, installation de Windows, préparation de postes, câblage, assistance) : garder seulement celles réellement effectuées.
-- **[à compléter]** Le texte indique « Le détail des missions de chaque stage est à compléter ». Il est possible de créer une entrée par stage (lieu, dates, missions) et de supprimer l'entrée groupée.
-- **[supposé]** Mention « un laboratoire du CNRS » pour le LNC de Marseille : vérifier le nom exact du laboratoire.
+### Stages (3 entrées, novembre 2026)
+Sources : CV de décembre 2023 et de février 2024, rapport de stage La Salle de juin 2023 (Google Drive d'Alexandre). Les CV de 2026 n'étaient lisibles que comme pièces jointes Gmail.
+- **[fourni]** CNRS · Laboratoire de Neurosciences Cognitives (LNC), Marseille, du 27/02/2023 au 17/03/2023 : câblage, calibrage imprimante-ordinateur, mise à jour de logiciels, devis pour l'assemblage d'un ordinateur.
+- **[supposé]** CNRS : phrase sur le programme MATLAB couplé à un logiciel qui lit l'électroencéphalogramme (idée suggérée pour la lettre de motivation de mars 2026) : à confirmer.
+- **[fourni]** La Salle Avignon, service technique et sécurité, juin 2023 (dates du CV : 05/06 au 23/06/2023) : câbles réseau et bornes Wi-Fi, FOG, réinstallation et domaine, souris, encre, coques d'iPad, dépannage du foyer, mises à jour.
+- **[supposé]** « 2de Bac Pro » pour ces deux stages (le CV de 2023 indique « 2023-2024 : 1ère pro SN »).
+- **[à compléter]** « 4 autres stages » (La Salle Avignon et Cité scolaire Frédéric Mistral, 2024 → 2025) : missions **types** seulement. Le CV de février 2024 cite un stage du 29/01/2024 au 23/02/2024 sans lieu. Envoyer le CV 2026 (PDF dans le Drive ou dans la conversation) pour créer une entrée détaillée par stage.
 
 ### Bac Pro SN option RISC
 - **[supposé]** Période : 1er septembre 2022 au 4 juillet 2025 (affichée « 2022 → 2025 »).

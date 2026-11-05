@@ -78,7 +78,7 @@ $toc = [
             <h2 class="content-block__title" id="titre-propriete">Propriété intellectuelle</h2>
             <div class="prose">
                 <p>Les textes, le code, les captures d'écran et les vidéos présentés sur ce site sont la propriété de <?= e($publisher) ?>, sauf mention contraire. Toute reproduction ou réutilisation, même partielle, nécessite son accord préalable.</p>
-                <p>Roblox est une marque de Roblox Corporation. Les univers dont s'inspirent certains projets (<em>Doctor Who</em>, <em>Loki</em> et la Time Variance Authority) appartiennent à leurs ayants droit respectifs : ces projets sont des créations personnelles de fan, sans lien avec eux.</p>
+                <p>Roblox est une marque de Roblox Corporation. Les univers dont s'inspirent certains projets (<em>Doctor Who</em>, <em>Loki</em> et le Tribunal des Variations Anachroniques, ou TVA) appartiennent à leurs ayants droit respectifs : ces projets sont des créations personnelles de fan, sans lien avec eux.</p>
                 <p>Les polices Inter et JetBrains Mono sont utilisées sous licence SIL Open Font License 1.1 et sont servies directement par ce site.</p>
             </div>
         </section>
